@@ -227,7 +227,7 @@ pre .c{color:var(--text-3);font-style:italic}
       <p>Centro Paso a Paso</p>
     </div>
   </div>
-  <span class="badge">v1.3 · En definición</span>
+  <span class="badge">v1.5 · Sesión 21/07/2026</span>
 </header>
 
 <nav>
@@ -2852,6 +2852,8 @@ Next:
         <div>🔗 Webhook Kapso → Node.js funcionando end-to-end</div>
         <div>📨 Mensajes entrantes recibidos y logueados correctamente</div>
         <div>🏗️ Router por tipo: text / image / audio</div>
+        <div>🔄 Onboarding completo: 4 pasos (rol → nombre → búsqueda → confirmación)</div>
+        <div>🧪 Mock data: <strong style="color:var(--text-1)">Norberto Alonso</strong> (alumno) · <strong style="color:var(--text-1)">Angel Labruna</strong> (empleado)</div>
         <div>📋 4 templates enviados a revisión de Meta</div>
         <div>🐙 Repo en GitHub con código y documentación</div>
         <div>📄 GitHub Pages con este documento</div>
@@ -2889,15 +2891,18 @@ Next:
       <span class="ep-chevron">›</span>
     </div>
     <div class="ep-body">
-      <div class="ep-section-label">Código completo actual</div>
+      <div class="ep-section-label">Código completo actual — index.js v3</div>
       <pre><span class="k">require</span>(<span class="s">'dotenv'</span>).config();
 <span class="k">const</span> express = <span class="k">require</span>(<span class="s">'express'</span>);
 <span class="k">const</span> app = express();
-
 app.use(express.json());
 
-app.post(<span class="s">'/webhook'</span>, (req, res) => {
-  res.sendStatus(200); <span class="c">// responder inmediatamente siempre</span>
+<span class="k">const</span> { getUsuarioWA }       = <span class="k">require</span>(<span class="s">'./bdd'</span>);
+<span class="k">const</span> { getSesion }          = <span class="k">require</span>(<span class="s">'./sesiones'</span>);
+<span class="k">const</span> { procesarOnboarding } = <span class="k">require</span>(<span class="s">'./onboarding'</span>);
+
+app.post(<span class="s">'/webhook'</span>, <span class="k">async</span> (req, res) => {
+  res.sendStatus(200);
 
   <span class="k">const</span> body = req.body;
   <span class="k">const</span> msg  = body?.message;
@@ -2907,47 +2912,26 @@ app.post(<span class="s">'/webhook'</span>, (req, res) => {
   <span class="k">const</span> type = msg.type;
   <span class="k">const</span> name = body?.conversation?.contact_name || from;
 
-  console.log(<span class="s">`\nMensaje de ${name} (${from}) | tipo: ${type}`</span>);
+  console.log(<span class="s">`\n📩 ${name} (${from}) | tipo: ${type}`</span>);
 
-  <span class="k">if</span> (type === <span class="s">'text'</span>) {
-    <span class="k">const</span> texto = msg.text?.body;
-    console.log(<span class="s">`  Texto: "${texto}"`</span>);
-    handleTextMessage(from, name, texto);
-  } <span class="k">else if</span> (type === <span class="s">'image'</span>) {
-    handleImage(from, name, msg);
-  } <span class="k">else if</span> (type === <span class="s">'audio'</span>) {
-    handleAudio(from, name, msg);
+  <span class="c">// 1. ¿Hay sesión de onboarding activa?</span>
+  <span class="k">const</span> sesion = <span class="k">await</span> getSesion(from);
+  <span class="k">if</span> (sesion) {
+    <span class="k">await</span> procesarOnboarding(from, name, msg);
+    <span class="k">return</span>;
   }
-});
 
-<span class="k">function</span> handleTextMessage(from, name, text) {
-  <span class="c">// TODO: lookup en usuarios_wa → BDD SAIE</span>
-  <span class="c">// TODO: si no existe → flujo de onboarding</span>
-  <span class="c">// TODO: si existe → router de actores (familia / empleado)</span>
-  console.log(<span class="s">`  → procesando texto de ${name}`</span>);
-}
+  <span class="c">// 2. ¿Número registrado en usuarios_wa?</span>
+  <span class="k">const</span> usuario = <span class="k">await</span> getUsuarioWA(from);
+  <span class="k">if</span> (!usuario) {
+    <span class="k">await</span> procesarOnboarding(from, name, msg);
+    <span class="k">return</span>;
+  }
 
-<span class="k">function</span> handleImage(from, name, msg) {
-  <span class="c">// TODO: descargar desde Kapso/Meta</span>
-  <span class="c">// TODO: clasificar tipo de documento</span>
-  <span class="c">// TODO: validar con GPT-4o Vision</span>
-  console.log(<span class="s">`  → procesando imagen de ${name}`</span>);
-}
-
-<span class="k">function</span> handleAudio(from, name, msg) {
-  <span class="c">// TODO: descargar audio</span>
-  <span class="c">// TODO: transcribir con Whisper</span>
-  <span class="c">// TODO: guardar en informes_empleados</span>
-  console.log(<span class="s">`  → procesando audio de ${name}`</span>);
-}
-
-app.get(<span class="s">'/'</span>, (req, res) => {
-  res.json({ status: <span class="s">'ok'</span>, sistema: <span class="s">'SAIE WhatsApp'</span> });
-});
-
-<span class="k">const</span> PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(<span class="s">`SAIE WhatsApp corriendo en puerto ${PORT}`</span>);
+  <span class="c">// 3. Router de actores</span>
+  <span class="k">if</span> (type === <span class="s">'text'</span>)  <span class="k">await</span> handleTextMessage(from, name, msg, usuario);
+  <span class="k">if</span> (type === <span class="s">'image'</span>) <span class="k">await</span> handleImage(from, name, msg, usuario);
+  <span class="k">if</span> (type === <span class="s">'audio'</span>) <span class="k">await</span> handleAudio(from, name, msg, usuario);
 });</pre>
     </div>
   </div>
