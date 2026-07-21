@@ -241,6 +241,7 @@ pre .c{color:var(--text-3);font-style:italic}
   <button class="nav-tab" onclick="showPanel('meta')">Setup Meta API</button>
   <button class="nav-tab" onclick="showPanel('kapso')">Setup Kapso</button>
   <button class="nav-tab" onclick="showPanel('comparacion')">Comparación proveedores</button>
+  <button class="nav-tab" onclick="showPanel('estado')">📍 Estado del proyecto</button>
 </nav>
 
 <main>
@@ -2824,10 +2825,301 @@ Next:
 
 </div><!-- end comparacion panel -->
 
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: ESTADO DEL PROYECTO
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-estado">
+  <div class="section-header">
+    <div class="eyebrow">Sesión 21/07/2026</div>
+    <h2>Estado del proyecto</h2>
+    <p>Lo que está funcionando, lo que está pendiente y los próximos pasos concretos.</p>
+  </div>
+
+  <!-- REPO -->
+  <div class="info-box blue" style="margin-bottom:24px">
+    <strong>Repositorio:</strong> <a href="https://github.com/lkatcheroff/saie-whatsapp" target="_blank" style="color:var(--blue)">github.com/lkatcheroff/saie-whatsapp</a> · Private · 1 branch · Node.js + Kapso<br>
+    <strong>Documentación:</strong> <a href="https://lkatcheroff.github.io/saie-whatsapp/saie-whatsapp-flows.html" target="_blank" style="color:var(--blue)">lkatcheroff.github.io/saie-whatsapp/saie-whatsapp-flows.html</a>
+  </div>
+
+  <!-- ESTADO GENERAL -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px">
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="color:var(--green)">✅</span> &nbsp;Funcionando</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--text-2)">
+        <div>📱 Número <strong style="color:var(--text-1)">+1 555-353-5901</strong> "Centro Paso a Paso" · CONNECTED</div>
+        <div>🔗 Webhook Kapso → Node.js funcionando end-to-end</div>
+        <div>📨 Mensajes entrantes recibidos y logueados correctamente</div>
+        <div>🏗️ Router por tipo: text / image / audio</div>
+        <div>📋 4 templates enviados a revisión de Meta</div>
+        <div>🐙 Repo en GitHub con código y documentación</div>
+        <div>📄 GitHub Pages con este documento</div>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="color:var(--amber)">⏳</span> &nbsp;Pendiente</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--text-2)">
+        <div>✅ Aprobación de 4 templates Meta (2–4hs)</div>
+        <div>🔍 Lookup de número en <code>usuarios_wa</code> → BDD SAIE</div>
+        <div>🆕 Flujo de onboarding para números nuevos</div>
+        <div>🔀 Router de actores (familia / empleado)</div>
+        <div>📸 Validación de documentos con GPT-4o Vision</div>
+        <div>🎙️ Transcripción de audios con Whisper</div>
+        <div>🔢 Número argentino (+54) propio para producción</div>
+        <div>🌐 Deploy en servidor real (sin ngrok)</div>
+        <div>📡 Endpoints de la BDD existente de SAIE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CÓDIGO ACTUAL -->
+  <div class="section-header">
+    <div class="eyebrow">Código · index.js</div>
+    <h2>Estado actual del webhook</h2>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim)">JS</span>
+      <span class="ep-path">index.js — webhook handler v1</span>
+      <span class="ep-desc">Recibe mensajes de Kapso, identifica remitente y enruta por tipo</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section-label">Código completo actual</div>
+      <pre><span class="k">require</span>(<span class="s">'dotenv'</span>).config();
+<span class="k">const</span> express = <span class="k">require</span>(<span class="s">'express'</span>);
+<span class="k">const</span> app = express();
+
+app.use(express.json());
+
+app.post(<span class="s">'/webhook'</span>, (req, res) => {
+  res.sendStatus(200); <span class="c">// responder inmediatamente siempre</span>
+
+  <span class="k">const</span> body = req.body;
+  <span class="k">const</span> msg  = body?.message;
+  <span class="k">if</span> (!msg) <span class="k">return</span>;
+
+  <span class="k">const</span> from = msg.from;
+  <span class="k">const</span> type = msg.type;
+  <span class="k">const</span> name = body?.conversation?.contact_name || from;
+
+  console.log(<span class="s">`\nMensaje de ${name} (${from}) | tipo: ${type}`</span>);
+
+  <span class="k">if</span> (type === <span class="s">'text'</span>) {
+    <span class="k">const</span> texto = msg.text?.body;
+    console.log(<span class="s">`  Texto: "${texto}"`</span>);
+    handleTextMessage(from, name, texto);
+  } <span class="k">else if</span> (type === <span class="s">'image'</span>) {
+    handleImage(from, name, msg);
+  } <span class="k">else if</span> (type === <span class="s">'audio'</span>) {
+    handleAudio(from, name, msg);
+  }
+});
+
+<span class="k">function</span> handleTextMessage(from, name, text) {
+  <span class="c">// TODO: lookup en usuarios_wa → BDD SAIE</span>
+  <span class="c">// TODO: si no existe → flujo de onboarding</span>
+  <span class="c">// TODO: si existe → router de actores (familia / empleado)</span>
+  console.log(<span class="s">`  → procesando texto de ${name}`</span>);
+}
+
+<span class="k">function</span> handleImage(from, name, msg) {
+  <span class="c">// TODO: descargar desde Kapso/Meta</span>
+  <span class="c">// TODO: clasificar tipo de documento</span>
+  <span class="c">// TODO: validar con GPT-4o Vision</span>
+  console.log(<span class="s">`  → procesando imagen de ${name}`</span>);
+}
+
+<span class="k">function</span> handleAudio(from, name, msg) {
+  <span class="c">// TODO: descargar audio</span>
+  <span class="c">// TODO: transcribir con Whisper</span>
+  <span class="c">// TODO: guardar en informes_empleados</span>
+  console.log(<span class="s">`  → procesando audio de ${name}`</span>);
+}
+
+app.get(<span class="s">'/'</span>, (req, res) => {
+  res.json({ status: <span class="s">'ok'</span>, sistema: <span class="s">'SAIE WhatsApp'</span> });
+});
+
+<span class="k">const</span> PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(<span class="s">`SAIE WhatsApp corriendo en puerto ${PORT}`</span>);
+});</pre>
+    </div>
+  </div>
+
+  <!-- PAYLOAD REAL -->
+  <div class="endpoint" style="margin-top:10px">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">{}</span>
+      <span class="ep-path">Payload real de Kapso — verificado 21/07/2026</span>
+      <span class="ep-desc">Estructura exacta que llega al webhook cuando alguien escribe</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre>{
+  <span class="k">"message"</span>: {
+    <span class="k">"from"</span>: <span class="s">"541153496753"</span>,           <span class="c">// número sin +</span>
+    <span class="k">"from_user_id"</span>: <span class="s">"AR.1039233702370693"</span>,  <span class="c">// BSUID de Meta</span>
+    <span class="k">"type"</span>: <span class="s">"text"</span>,                    <span class="c">// text | image | audio</span>
+    <span class="k">"text"</span>: { <span class="k">"body"</span>: <span class="s">"Mensaje test"</span> },
+    <span class="k">"kapso"</span>: {
+      <span class="k">"direction"</span>: <span class="s">"inbound"</span>,
+      <span class="k">"content"</span>: <span class="s">"Mensaje test"</span>
+    }
+  },
+  <span class="k">"conversation"</span>: {
+    <span class="k">"id"</span>: <span class="s">"93589a66-d307-4a89-8410-1b53df18a8c1"</span>,
+    <span class="k">"contact_name"</span>: <span class="s">"Lucas Katche"</span>,   <span class="c">// nombre del contacto en WA</span>
+    <span class="k">"phone_number"</span>: <span class="s">"541153496753"</span>,
+    <span class="k">"phone_number_id"</span>: <span class="s">"1239124659280244"</span>
+  },
+  <span class="k">"is_new_conversation"</span>: <span class="n">false</span>,
+  <span class="k">"phone_number_id"</span>: <span class="s">"1239124659280244"</span>
+}</pre>
+      <div class="ep-section-label">Diferencia clave vs Meta directo</div>
+      <pre><span class="c">// Kapso NO manda un campo "event" en el nivel raíz.
+// El payload llega directamente con "message" y "conversation".
+// Meta directo manda: { "object": "whatsapp_business_account", "entry": [...] }
+// Kapso simplifica la estructura considerablemente.</span></pre>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div class="section-header" style="margin-top:28px">
+    <div class="eyebrow">Templates · Estado al 21/07/2026</div>
+    <h2>Templates enviados a revisión</h2>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Nombre</th>
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Categoría</th>
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Destinatario</th>
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Estado</th>
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Texto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-family:var(--mono);color:var(--green)">bienvenida_registro</td>
+          <td style="padding:10px 12px;color:var(--text-2)">UTILITY</td>
+          <td style="padding:10px 12px;color:var(--text-2)">Familia / Empleado</td>
+          <td style="padding:10px 12px"><span style="color:var(--amber)">⏳ En revisión</span></td>
+          <td style="padding:10px 12px;color:var(--text-2);font-size:11px">Hola, soy el asistente de Centro Paso a Paso. Para registrarte, necesito saber tu rol. ¿Sos familiar de un alumno o profesional del equipo?</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-family:var(--mono);color:var(--green)">docs_requeridos</td>
+          <td style="padding:10px 12px;color:var(--text-2)">UTILITY</td>
+          <td style="padding:10px 12px;color:var(--text-2)">Familia</td>
+          <td style="padding:10px 12px"><span style="color:var(--amber)">⏳ En revisión</span></td>
+          <td style="padding:10px 12px;color:var(--text-2);font-size:11px">Hola {{1}}, desde Centro Paso a Paso te informamos que necesitamos los siguientes documentos para la prestación de {{2}}: {{3}}. Por favor envianos cada uno por este medio indicando de qué documento se trata.</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;font-family:var(--mono);color:var(--green)">acreditacion_sueldo</td>
+          <td style="padding:10px 12px;color:var(--text-2)">UTILITY</td>
+          <td style="padding:10px 12px;color:var(--text-2)">Empleado</td>
+          <td style="padding:10px 12px"><span style="color:var(--amber)">⏳ En revisión</span></td>
+          <td style="padding:10px 12px;color:var(--text-2);font-size:11px">Hola {{1}}, te informamos que se acreditó tu sueldo correspondiente al período {{2}} por un monto de ${{3}}. Fecha de acreditación: {{4}}. [texto de cierre elegido por el equipo]</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 12px;font-family:var(--mono);color:var(--green)">documento_vencimiento</td>
+          <td style="padding:10px 12px;color:var(--text-2)">UTILITY</td>
+          <td style="padding:10px 12px;color:var(--text-2)">Familia</td>
+          <td style="padding:10px 12px"><span style="color:var(--amber)">⏳ En revisión</span></td>
+          <td style="padding:10px 12px;color:var(--text-2);font-size:11px">Hola {{1}}, te recordamos que el documento {{2}} de {{3}} vence el {{4}}. Por favor renovalo y envianos la nueva versión antes de esa fecha para no interrumpir la prestación.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PRÓXIMOS PASOS -->
+  <div class="section-header" style="margin-top:28px">
+    <div class="eyebrow">Roadmap</div>
+    <h2>Próximos pasos</h2>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">1</span>
+        <span class="ep-path">Lookup de número en BDD SAIE</span>
+        <span class="ep-desc">Conectar el webhook con la BDD existente para identificar actores</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <pre><span class="c">// En handleTextMessage, reemplazar el TODO por:</span>
+<span class="k">async function</span> handleTextMessage(from, name, text) {
+  <span class="k">const</span> usuario = <span class="k">await</span> getUsuarioWA(from);  <span class="c">// GET /api/wa/usuario?phone=</span>
+  
+  <span class="k">if</span> (!usuario) {
+    <span class="k">return</span> iniciarOnboarding(from);  <span class="c">// flujo de registro</span>
+  }
+  
+  <span class="k">if</span> (usuario.rol === <span class="s">'familia'</span>) {
+    <span class="k">return</span> handleFamilia(from, usuario, text);
+  }
+  
+  <span class="k">if</span> (usuario.rol === <span class="s">'empleado'</span>) {
+    <span class="k">return</span> handleEmpleado(from, usuario, text);
+  }
+}
+
+<span class="c">// Requiere: GET /api/wa/usuario?phone={from} → ver panel Endpoints BDD</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">2</span>
+        <span class="ep-path">Flujo de onboarding</span>
+        <span class="ep-desc">Cuando llega un número nuevo — ver panel "Nuevo número"</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <pre><span class="c">// Requiere tabla sesiones_wa para mantener el estado entre mensajes.
+// El webhook de Kapso es stateless — cada mensaje llega independiente.
+// La sesión guarda en qué paso del onboarding está el usuario.</span>
+
+<span class="k">async function</span> iniciarOnboarding(from) {
+  <span class="k">await</span> guardarSesion(from, { paso: <span class="s">'esperando_rol'</span> });
+  <span class="k">await</span> enviarTemplate(from, <span class="s">'bienvenida_registro'</span>);
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">3</span>
+        <span class="ep-path">Deploy en servidor real</span>
+        <span class="ep-desc">Reemplazar ngrok por un servidor con URL fija</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <pre><span class="c">// Opciones para deploy del backend Node.js:</span>
+Railway:   <span class="s">railway.app</span>    → deploy desde GitHub, gratis hasta $5/mes
+Render:    <span class="s">render.com</span>     → plan free disponible, bueno para Node.js
+Fly.io:    <span class="s">fly.io</span>         → más control, requiere config
+VPS:       cualquier VPS con Node.js instalado
+
+<span class="c">// Una vez deployado, actualizar la URL del webhook en Kapso:
+// app.kapso.ai → Integrations → Webhooks → editar URL</span></pre>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end estado panel -->
+
 </main>
 
 <script>
-const PANELS = ['overview','onboarding','familias','empleados','sistema','stack','endpoints','meta','kapso','comparacion'];
+const PANELS = ['overview','onboarding','familias','empleados','sistema','stack','endpoints','meta','kapso','comparacion','estado'];
 
 function showSub(id) {
   document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
