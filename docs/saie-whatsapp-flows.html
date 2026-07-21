@@ -1,0 +1,2856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAIE · Flujos WhatsApp — Centro Paso a Paso</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:        #0E1117; --bg-card:  #161B25; --bg-card2: #1C2333;
+  --border:    rgba(255,255,255,0.07); --border-hi: rgba(255,255,255,0.14);
+  --green:     #25D366; --green-dim: #1A9448; --green-glow: rgba(37,211,102,0.10);
+  --purple:    #9B7FFF; --purple-dim: #6B52D0; --purple-bg: rgba(155,127,255,0.08);
+  --amber:     #F0A030; --amber-bg: rgba(240,160,48,0.08);
+  --coral:     #F06050; --coral-bg: rgba(240,96,80,0.08);
+  --blue:      #4A9EFF; --blue-bg:  rgba(74,158,255,0.09);
+  --teal:      #2DD4BF; --teal-bg:  rgba(45,212,191,0.08);
+  --slate:     #7A8BA8; --slate-bg: rgba(122,139,168,0.08);
+  --text-1: #E8ECF2; --text-2: #8A95A8; --text-3: #505A6A;
+  --radius: 10px; --radius-lg: 16px;
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text-1);line-height:1.6;min-height:100vh}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:22px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:sticky;top:0;background:rgba(14,17,23,0.94);backdrop-filter:blur(14px);z-index:100}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:34px;height:34px;background:var(--green-glow);border:1px solid var(--green-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text h1{font-size:14px;font-weight:600;letter-spacing:-0.01em}
+.logo-text p{font-size:11px;color:var(--text-2)}
+.badge{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:20px;background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim)}
+
+/* NAV */
+nav{padding:0 48px;border-bottom:1px solid var(--border);display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-tab{padding:13px 16px 11px;font-size:13px;font-weight:500;color:var(--text-2);border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;font-family:var(--font);position:relative;top:1px}
+.nav-tab:hover{color:var(--text-1)}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* LAYOUT */
+main{max-width:1100px;margin:0 auto;padding:36px 48px}
+.panel{display:none}
+.panel.active{display:block;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEADER */
+.section-header{margin-bottom:28px}
+.eyebrow{font-size:11px;font-family:var(--mono);color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.section-header h2{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.section-header p{margin-top:5px;font-size:13px;color:var(--text-2);max-width:640px;line-height:1.6}
+
+/* LEGEND */
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:24px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* FLOW */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;position:relative}
+.flow-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%}
+.flow-col-header{font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;text-align:center}
+
+/* NODES */
+.node{width:100%;max-width:460px;border-radius:var(--radius);padding:13px 16px;border:1px solid var(--border);position:relative;transition:border-color .2s,box-shadow .2s;cursor:default}
+.node:hover{border-color:var(--border-hi)}
+.node-title{font-size:13px;font-weight:600;line-height:1.3}
+.node-sub{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.45}
+.node-tech{font-size:11px;font-family:var(--mono);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);color:var(--text-3);line-height:1.5}
+.node-tech .tech-tag{display:inline-block;background:var(--bg-card2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;margin:2px 2px 0 0;color:var(--text-2);font-size:10px}
+.node-icon{position:absolute;right:13px;top:13px;font-size:15px;opacity:.55}
+
+/* Node color variants */
+.node-sys  {background:var(--green-glow); border-color:rgba(37,211,102,.18)}
+.node-sys  .node-title{color:#4ADE80}
+.node-user {background:var(--purple-bg);  border-color:rgba(155,127,255,.2)}
+.node-user .node-title{color:var(--purple)}
+.node-dec  {background:var(--amber-bg);   border-color:rgba(240,160,48,.2)}
+.node-dec  .node-title{color:var(--amber)}
+.node-db   {background:var(--slate-bg);   border-color:rgba(122,139,168,.2)}
+.node-db   .node-title{color:var(--slate)}
+.node-err  {background:var(--coral-bg);   border-color:rgba(240,96,80,.2)}
+.node-err  .node-title{color:var(--coral)}
+.node-ai   {background:var(--blue-bg);    border-color:rgba(74,158,255,.2)}
+.node-ai   .node-title{color:var(--blue)}
+.node-api  {background:var(--teal-bg);    border-color:rgba(45,212,191,.2)}
+.node-api  .node-title{color:var(--teal)}
+
+/* ARROWS */
+.arrow{display:flex;flex-direction:column;align-items:center;height:34px;position:relative;width:100%;max-width:460px}
+.arrow::after{content:'';position:absolute;top:0;left:50%;height:100%;width:1.5px;background:linear-gradient(to bottom,var(--border-hi),var(--border));transform:translateX(-50%)}
+.arrow-head{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--border-hi)}
+.arrow-label{position:absolute;top:50%;left:calc(50% + 10px);transform:translateY(-50%);font-size:10px;font-family:var(--mono);color:var(--text-3);white-space:nowrap;background:var(--bg);padding:0 3px}
+
+/* BRANCH */
+.branch-wrap{display:flex;gap:16px;width:100%;max-width:460px;justify-content:center}
+.branch-side{flex:1;display:flex;flex-direction:column;align-items:center;gap:0}
+.branch-label{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px;height:28px;display:flex;align-items:center;margin-bottom:0}
+.branch-label.yes{color:#4ADE80;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.2)}
+.branch-label.no {color:var(--coral);background:rgba(240,96,80,.07);border:1px solid rgba(240,96,80,.2)}
+
+/* CARDS - overview */
+.overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.actor-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:border-color .2s,transform .15s;cursor:pointer}
+.actor-card:hover{border-color:var(--border-hi);transform:translateY(-2px)}
+.actor-card .icon{font-size:26px;margin-bottom:10px}
+.actor-card h3{font-size:14px;font-weight:600;margin-bottom:3px}
+.actor-card p{font-size:12px;color:var(--text-2);line-height:1.5}
+.actor-card .pill{display:inline-block;margin-top:10px;font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px}
+.pill-green {background:var(--green-glow);color:var(--green);border:1px solid var(--green-dim)}
+.pill-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-dim)}
+.pill-amber {background:var(--amber-bg);color:var(--amber);border:1px solid rgba(240,160,48,.3)}
+.pill-blue  {background:var(--blue-bg);color:var(--blue);border:1px solid rgba(74,158,255,.3)}
+
+/* RULE CARDS */
+.rules-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px}
+.rule-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;gap:12px}
+.rule-num{width:26px;height:26px;border-radius:50%;background:var(--green-glow);border:1px solid var(--green-dim);color:var(--green);font-size:11px;font-weight:600;font-family:var(--mono);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rule-card h4{font-size:13px;font-weight:600;margin-bottom:3px}
+.rule-card p{font-size:12px;color:var(--text-2);line-height:1.5}
+
+/* STACK */
+.stack-layers{display:flex;flex-direction:column;gap:10px}
+.stack-layer{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 22px;transition:border-color .2s}
+.stack-layer:hover{border-color:var(--border-hi)}
+.stack-layer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stack-layer-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px}
+.layer-icon{font-size:16px;width:28px;text-align:center}
+.stack-layer-badge{font-size:10px;font-family:var(--mono);color:var(--text-3);background:var(--bg-card2);border:1px solid var(--border);padding:2px 7px;border-radius:20px}
+.stack-items{display:flex;flex-wrap:wrap;gap:8px}
+.stack-item{display:flex;flex-direction:column;background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;min-width:150px;flex:1;transition:border-color .2s}
+.stack-item:hover{border-color:var(--border-hi)}
+.stack-item-name{font-size:13px;font-weight:600;color:var(--text-1)}
+.stack-item-role{font-size:11px;color:var(--text-2);margin-top:2px}
+.stack-item-note{font-size:11px;font-family:var(--mono);color:var(--text-3);margin-top:5px}
+.stack-connector{display:flex;justify-content:center;padding:2px 0;color:var(--text-3);font-size:16px}
+
+/* DB SCHEMA */
+.db-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.db-table{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.db-table-header{background:var(--bg-card2);border-bottom:1px solid var(--border);padding:11px 15px;font-size:13px;font-weight:600;font-family:var(--mono);color:var(--green);display:flex;align-items:center;gap:7px}
+.db-table-header span{color:var(--text-3);font-weight:400;font-size:10px}
+.db-row{display:flex;align-items:center;gap:10px;padding:8px 15px;border-bottom:1px solid var(--border);font-size:12px;transition:background .15s}
+.db-row:last-child{border-bottom:none}
+.db-row:hover{background:var(--bg-card2)}
+.db-col-name{font-family:var(--mono);color:var(--text-1);min-width:130px;font-size:11px}
+.db-col-type{font-family:var(--mono);color:var(--purple);font-size:10px;min-width:80px}
+.db-col-note{color:var(--text-3);font-size:11px;flex:1}
+.db-pk{background:rgba(240,160,48,.05)}
+.db-fk{background:rgba(155,127,255,.04)}
+.tag{font-size:9px;font-family:var(--mono);padding:1px 5px;border-radius:4px;flex-shrink:0}
+.tag-pk{background:rgba(240,160,48,.15);color:var(--amber);border:1px solid rgba(240,160,48,.2)}
+.tag-fk{background:rgba(155,127,255,.1);color:var(--purple);border:1px solid rgba(155,127,255,.2)}
+.tag-sp{width:22px;display:inline-block}
+
+/* ENDPOINTS */
+.endpoints{display:flex;flex-direction:column;gap:12px}
+.endpoint{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s}
+.endpoint:hover{border-color:var(--border-hi)}
+.ep-header{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none}
+.ep-method{font-size:10px;font-family:var(--mono);font-weight:600;padding:3px 8px;border-radius:5px;flex-shrink:0}
+.ep-method.get {background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.ep-method.post{background:rgba(37,211,102,.10);color:var(--green);border:1px solid rgba(37,211,102,.25)}
+.ep-path{font-family:var(--mono);font-size:12px;color:var(--text-1);flex:1}
+.ep-desc{font-size:11px;color:var(--text-2)}
+.ep-chevron{color:var(--text-3);font-size:14px;transition:transform .2s;flex-shrink:0}
+.ep-body{display:none;border-top:1px solid var(--border);padding:14px 16px}
+.ep-body.open{display:block}
+.ep-section-label{font-size:10px;font-family:var(--mono);color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+pre{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.6;overflow-x:auto;color:var(--text-2);margin-bottom:10px}
+pre .k{color:var(--purple)}
+pre .s{color:var(--green)}
+pre .n{color:var(--amber)}
+pre .c{color:var(--text-3);font-style:italic}
+
+/* INFO BOX */
+.info-box{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:0 var(--radius) var(--radius) 0;padding:12px 16px;margin:18px 0;font-size:12px;color:var(--text-2);line-height:1.6}
+.info-box.amber{border-left-color:var(--amber)}
+.info-box.purple{border-left-color:var(--purple)}
+.info-box.blue{border-left-color:var(--blue)}
+.info-box strong{color:var(--text-1);font-weight:600}
+
+/* ONBOARDING STATES */
+.chat-sim{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;max-width:480px;margin:0 auto}
+.chat-msg{display:flex;gap:8px;margin-bottom:10px;align-items:flex-end}
+.chat-msg.out{flex-direction:row-reverse}
+.chat-bubble{max-width:75%;padding:9px 13px;border-radius:12px;font-size:12px;line-height:1.5}
+.chat-msg.in  .chat-bubble{background:var(--bg-card2);border:1px solid var(--border);border-radius:2px 12px 12px 12px}
+.chat-msg.out .chat-bubble{background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.2);border-radius:12px 2px 12px 12px;color:#4ADE80}
+.chat-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--bg-card2);border:1px solid var(--border)}
+.chat-time{font-size:10px;color:var(--text-3);margin-top:2px;text-align:right}
+.chat-step-label{font-size:10px;font-family:var(--mono);color:var(--text-3);text-align:center;margin:8px 0;letter-spacing:.04em}
+
+/* SOURCES */
+.sources-block{margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}
+.sources-title{font-size:10px;font-family:var(--mono);color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.source-list{display:flex;flex-direction:column;gap:5px}
+.src-item{display:flex;align-items:baseline;gap:10px;font-size:11px;line-height:1.5}
+.src-num{font-family:var(--mono);color:var(--text-3);min-width:22px;flex-shrink:0}
+.src-title{color:var(--text-2);flex:1}
+.src-url{font-family:var(--mono);font-size:10px;color:var(--text-3);word-break:break-all}
+.src-date{font-family:var(--mono);font-size:10px;color:var(--text-3);flex-shrink:0;white-space:nowrap}
+.src-item a{color:var(--blue);text-decoration:none}
+.src-item a:hover{text-decoration:underline}
+
+/* RESPONSIVE */
+.sub-tab{padding:8px 16px;border-radius:20px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;color:var(--text-2);background:var(--bg-card);transition:.15s;font-family:var(--font)}
+.sub-tab.active{background:var(--bg-card2);color:var(--text-1);border-color:var(--border-hi)}
+.sub-panel{display:none}
+.sub-panel.active{display:block;animation:fadeIn .2s ease}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  header,nav,main{padding-left:18px;padding-right:18px}
+  .overview-grid,.rules-grid,.db-grid,.flow-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">💬</div>
+    <div class="logo-text">
+      <h1>SAIE · Flujos WhatsApp</h1>
+      <p>Centro Paso a Paso</p>
+    </div>
+  </div>
+  <span class="badge">v1.3 · En definición</span>
+</header>
+
+<nav>
+  <button class="nav-tab active" onclick="showPanel('overview')">Visión general</button>
+  <button class="nav-tab" onclick="showPanel('onboarding')">Nuevo número</button>
+  <button class="nav-tab" onclick="showPanel('familias')">Familias</button>
+  <button class="nav-tab" onclick="showPanel('empleados')">RETAS / RET</button>
+  <button class="nav-tab" onclick="showPanel('sistema')">Eventos del sistema</button>
+  <button class="nav-tab" onclick="showPanel('stack')">Stack técnico</button>
+  <button class="nav-tab" onclick="showPanel('endpoints')">Endpoints BDD</button>
+  <button class="nav-tab" onclick="showPanel('meta')">Setup Meta API</button>
+  <button class="nav-tab" onclick="showPanel('kapso')">Setup Kapso</button>
+  <button class="nav-tab" onclick="showPanel('comparacion')">Comparación proveedores</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: OVERVIEW
+════════════════════════════════════════════════════════════ -->
+<div class="panel active" id="p-overview">
+  <div class="section-header">
+    <div class="eyebrow">SAIE / WhatsApp</div>
+    <h2>Visión general del sistema</h2>
+    <p>Tres tipos de actores interactúan con el sistema vía WhatsApp. Cada uno tiene un flujo diferenciado de mensajes entrantes y salientes.</p>
+  </div>
+
+  <div class="overview-grid">
+    <div class="actor-card" onclick="showPanel('familias')">
+      <div class="icon">👨‍👩‍👧</div>
+      <h3>Familia</h3>
+      <p>Sube documentación solicitada. Recibe notificaciones de rechazo con detalle de qué documento reenviar.</p>
+      <span class="pill pill-purple">1 familia → 1 prestación</span>
+    </div>
+    <div class="actor-card" onclick="showPanel('empleados')">
+      <div class="icon">👩‍⚕️</div>
+      <h3>RETAS / RET</h3>
+      <p>Envía reportes, notas de voz o screenshots. Recibe notificaciones de acreditación de sueldo.</p>
+      <span class="pill pill-amber">1 empleado → n prestaciones</span>
+    </div>
+    <div class="actor-card" onclick="showPanel('sistema')">
+      <div class="icon">⚙️</div>
+      <h3>Sistema (SAIE)</h3>
+      <p>Genera eventos automáticos: docs faltantes, acreditaciones, vencimientos.</p>
+      <span class="pill pill-green">Motor de eventos</span>
+    </div>
+  </div>
+
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-num">1</div>
+      <div>
+        <h4>Identificación única por teléfono</h4>
+        <p>El número se registra una sola vez. Desde ahí el sistema reconoce automáticamente el rol en todos los mensajes siguientes. Ver panel <em>Nuevo número</em>.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">2</div>
+      <div>
+        <h4>Documentos trazables</h4>
+        <p>Cada archivo se clasifica por tipo y se valida con Vision AI (legibilidad + verificación de contenido). Path en Storage incluye prestación, tipo y hash.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">3</div>
+      <div>
+        <h4>Audios transcritos automáticamente</h4>
+        <p>Los mensajes de voz de empleados pasan por Whisper (OpenAI) antes de guardarse. El audio original queda archivado en Storage.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">4</div>
+      <div>
+        <h4>Templates aprobados para salientes</h4>
+        <p>Todo mensaje iniciado por el sistema usa templates aprobados por Meta. Los mensajes dentro de la ventana de 24 hs son libres.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: ONBOARDING - NUEVO NÚMERO
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-onboarding">
+  <div class="section-header">
+    <div class="eyebrow">Primer contacto</div>
+    <h2>Construcción de una conversación nueva</h2>
+    <p>Cuando un número desconocido escribe por primera vez, el sistema construye su contexto de sesión antes de procesar cualquier contenido.</p>
+  </div>
+
+  <div class="info-box blue">
+    <strong>¿Cuándo ocurre?</strong> La primera vez que el número no está en <code style="color:var(--blue)">usuarios_wa</code>. Una vez registrado, este flujo nunca vuelve a ejecutarse para ese número.
+  </div>
+
+  <div class="flow-cols" style="margin-top:24px">
+    <div>
+      <div class="flow-col-header">Flujo técnico</div>
+      <div class="flow">
+
+        <div class="node node-user">
+          <span class="node-icon">📱</span>
+          <div class="node-title">Llega mensaje de número desconocido</div>
+          <div class="node-sub">Cualquier tipo: texto, imagen, audio</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST /webhook</span>
+            <span class="tech-tag">campo: from</span>
+            Webhook de Meta entrega el evento con el <code>phone_number</code> en formato E.164
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-api">
+          <span class="node-icon">🔍</span>
+          <div class="node-title">Lookup en BDD: ¿existe en usuarios_wa?</div>
+          <div class="node-sub">Query por phone_number exacto</div>
+          <div class="node-tech">
+            <span class="tech-tag">GET /api/wa/usuario?phone=</span>
+            Si retorna 404 → onboarding. Si retorna 200 → flujo normal.
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">📨</span>
+          <div class="node-title">Sistema envía mensaje de bienvenida</div>
+          <div class="node-sub">Template "bienvenida_inicial" con botones de respuesta rápida</div>
+          <div class="node-tech">
+            <span class="tech-tag">Meta Interactive Message</span>
+            Botones: "Soy familiar de un alumno" / "Soy profesional del equipo"
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-user">
+          <span class="node-icon">👆</span>
+          <div class="node-title">Usuario selecciona su rol</div>
+          <div class="node-sub">Respuesta vía botón interactivo de Meta</div>
+          <div class="node-tech">
+            <span class="tech-tag">type: interactive</span>
+            <span class="tech-tag">button_reply.id</span>
+            El payload incluye el ID del botón presionado
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-dec">
+          <span class="node-icon">🔀</span>
+          <div class="node-title">Branching por rol seleccionado</div>
+          <div class="node-sub">familia → pide alumno | empleado → pide tipo (RETAS/RET)</div>
+        </div>
+
+        <div class="branch-wrap" style="margin:0">
+          <div class="branch-side">
+            <div class="branch-label yes">Familia →</div>
+            <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+            <div class="node node-sys" style="width:100%">
+              <div class="node-title" style="font-size:12px">Pide nombre del alumno</div>
+              <div class="node-sub">"¿A qué alumno representás?"</div>
+            </div>
+            <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+            <div class="node node-api" style="width:100%">
+              <div class="node-title" style="font-size:12px">Busca prestación por nombre</div>
+              <div class="node-tech" style="font-size:10px">
+                <span class="tech-tag">GET /api/prestaciones?nombre=</span>
+              </div>
+            </div>
+          </div>
+          <div class="branch-side">
+            <div class="branch-label no">Empleado →</div>
+            <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+            <div class="node node-sys" style="width:100%">
+              <div class="node-title" style="font-size:12px">Pide nombre y tipo</div>
+              <div class="node-sub">RETAS o RET</div>
+            </div>
+            <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+            <div class="node node-api" style="width:100%">
+              <div class="node-title" style="font-size:12px">Busca empleado por nombre</div>
+              <div class="node-tech" style="font-size:10px">
+                <span class="tech-tag">GET /api/empleados?nombre=</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-dec">
+          <span class="node-icon">✅</span>
+          <div class="node-title">¿Se encontró la entidad en BDD?</div>
+          <div class="node-sub">Si no se encuentra, se pide confirmación manual a un admin</div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-db">
+          <span class="node-icon">💾</span>
+          <div class="node-title">Crear registro en usuarios_wa</div>
+          <div class="node-sub">phone_number + rol + entidad_id</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST /api/wa/usuario</span>
+            Vincula número con la entidad encontrada en BDD
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">🎉</span>
+          <div class="node-title">Confirmar registro y continuar</div>
+          <div class="node-sub">"Listo, te registramos como [rol]. Ya podés enviarnos documentación."</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Simulación de chat -->
+    <div>
+      <div class="flow-col-header">Simulación de conversación</div>
+      <div class="chat-sim">
+
+        <div class="chat-step-label">— número desconocido escribe —</div>
+
+        <div class="chat-msg in">
+          <div class="chat-avatar">👤</div>
+          <div>
+            <div class="chat-bubble">Hola, necesito enviar documentos de mi hijo</div>
+            <div class="chat-time">10:22</div>
+          </div>
+        </div>
+
+        <div class="chat-step-label">— sistema detecta número nuevo, envía bienvenida —</div>
+
+        <div class="chat-msg out">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <div class="chat-bubble">¡Hola! Soy el asistente de Centro Paso a Paso.<br><br>Para registrarte, ¿cuál es tu rol?<br><br>👨‍👩‍👧 Soy familiar de un alumno<br>👩‍⚕️ Soy profesional del equipo</div>
+            <div class="chat-time">10:22 ✓✓</div>
+          </div>
+        </div>
+
+        <div class="chat-msg in">
+          <div class="chat-avatar">👤</div>
+          <div>
+            <div class="chat-bubble">Soy familiar de un alumno</div>
+            <div class="chat-time">10:23</div>
+          </div>
+        </div>
+
+        <div class="chat-msg out">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <div class="chat-bubble">Perfecto. ¿Cuál es el nombre del alumno?</div>
+            <div class="chat-time">10:23 ✓✓</div>
+          </div>
+        </div>
+
+        <div class="chat-msg in">
+          <div class="chat-avatar">👤</div>
+          <div>
+            <div class="chat-bubble">Sofía Rodríguez</div>
+            <div class="chat-time">10:24</div>
+          </div>
+        </div>
+
+        <div class="chat-step-label">— sistema busca prestación en BDD —</div>
+
+        <div class="chat-msg out">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <div class="chat-bubble">¿Confirmás que sos familiar de <strong>Sofía Rodríguez</strong>, prestación activa?<br><br>✅ Sí, confirmo<br>❌ No, el nombre es otro</div>
+            <div class="chat-time">10:24 ✓✓</div>
+          </div>
+        </div>
+
+        <div class="chat-msg in">
+          <div class="chat-avatar">👤</div>
+          <div>
+            <div class="chat-bubble">Sí, confirmo</div>
+            <div class="chat-time">10:24</div>
+          </div>
+        </div>
+
+        <div class="chat-step-label">— se crea registro en usuarios_wa —</div>
+
+        <div class="chat-msg out">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <div class="chat-bubble">✅ Listo, quedaste registrada como familiar de Sofía. A partir de ahora podés enviarnos documentación directamente por acá.</div>
+            <div class="chat-time">10:24 ✓✓</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="info-box" style="margin-top:16px">
+        <strong>Sesión persistente:</strong> el webhook de Meta no tiene estado. Cada mensaje es independiente. El "estado de conversación" se guarda en una tabla <code style="color:var(--green)">sesiones_wa</code> con el último paso del flujo, para poder retomar si el usuario abandona a mitad del onboarding.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: FAMILIAS
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-familias">
+  <div class="section-header">
+    <div class="eyebrow">Actor / Familia</div>
+    <h2>Flujo de documentación</h2>
+    <p>La familia recibe una solicitud, envía los archivos requeridos, y el sistema los valida en dos etapas antes de persistir.</p>
+  </div>
+
+  <div class="legend">
+    <span class="leg"><span class="leg-dot" style="background:#4ADE80"></span>Sistema</span>
+    <span class="leg"><span class="leg-dot" style="background:#9B7FFF"></span>Usuario</span>
+    <span class="leg"><span class="leg-dot" style="background:#F0A030"></span>Decisión</span>
+    <span class="leg"><span class="leg-dot" style="background:#4A9EFF"></span>IA / Vision</span>
+    <span class="leg"><span class="leg-dot" style="background:#2DD4BF"></span>API interna</span>
+    <span class="leg"><span class="leg-dot" style="background:#7A8BA8"></span>BDD</span>
+    <span class="leg"><span class="leg-dot" style="background:#F06050"></span>Error / reintento</span>
+  </div>
+
+  <div class="flow">
+
+    <div class="node node-sys" style="max-width:500px">
+      <span class="node-icon">⚙️</span>
+      <div class="node-title">Sistema detecta documentación incompleta o rechazada</div>
+      <div class="node-sub">Trigger por cambio de estado en tabla documentos</div>
+      <div class="node-tech">
+        <span class="tech-tag">pg_cron o Supabase trigger</span>
+        Consulta: <code>GET /api/prestaciones/:id/documentos-pendientes</code> — filtra estado = 'pendiente' o 'rechazado'
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-sys" style="max-width:500px">
+      <span class="node-icon">📨</span>
+      <div class="node-title">Envía WhatsApp a la familia con la lista</div>
+      <div class="node-sub">Template aprobado: lista de docs requeridos con descripción breve de cada uno</div>
+      <div class="node-tech">
+        <span class="tech-tag">Meta Cloud API</span>
+        <span class="tech-tag">template: docs_requeridos</span>
+        Obtiene phone_number desde: <code>GET /api/wa/usuario?prestacion_id=&amp;rol=familia</code>
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-user" style="max-width:500px">
+      <span class="node-icon">📱</span>
+      <div class="node-title">Familia envía imagen o PDF</div>
+      <div class="node-sub">Con caption indicando qué documento es (ej: "DNI frente"). Sin caption → el sistema pregunta.</div>
+      <div class="node-tech">
+        <span class="tech-tag">type: image | document</span>
+        Webhook entrega: <code>media_id</code>, <code>mime_type</code>, <code>caption</code> opcional
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-api" style="max-width:500px">
+      <span class="node-icon">⬇️</span>
+      <div class="node-title">Descargar el archivo desde Meta</div>
+      <div class="node-sub">Meta no entrega el binario directamente, hay que pedirlo con el media_id</div>
+      <div class="node-tech">
+        <span class="tech-tag">GET graph.facebook.com/{media_id}</span>
+        Retorna una URL temporal (válida ~5 min) → descargar binario → buffer en memoria
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-dec" style="max-width:500px">
+      <span class="node-icon">🏷️</span>
+      <div class="node-title">Clasificar tipo de documento</div>
+      <div class="node-sub">Combina caption + mime_type + lista de docs pendientes de esa prestación</div>
+      <div class="node-tech">
+        <span class="tech-tag">lógica propia Node.js</span>
+        Si no puede clasificar con certeza → responde preguntando: "¿Esto es el DNI frente o el dorso?"
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-ai" style="max-width:500px">
+      <span class="node-icon">🧠</span>
+      <div class="node-title">Validación de legibilidad</div>
+      <div class="node-sub">¿La imagen es técnicamente usable? Oscura, borrosa, cortada, girada, etc.</div>
+      <div class="node-tech">
+        <span class="tech-tag">OpenAI GPT-4o Vision</span>
+        Prompt: <em>"¿Esta imagen es legible como documento oficial? Responde solo: legible | ilegible | motivo"</em><br>
+        Input: base64 del buffer descargado. Output: clasificación + motivo si falla.
+      </div>
+    </div>
+
+    <div class="branch-wrap" style="margin:0">
+      <div class="branch-side">
+        <div class="branch-label no">Ilegible →</div>
+        <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+        <div class="node node-err" style="width:100%">
+          <div class="node-title" style="font-size:12px">Notifica con motivo específico</div>
+          <div class="node-sub">"La foto está borrosa, por favor reenviala con mejor luz y enfoque"</div>
+        </div>
+        <div style="font-size:10px;color:var(--coral);font-family:var(--mono);margin:6px 0;text-align:center">↑ vuelve al paso de envío</div>
+      </div>
+      <div class="branch-side">
+        <div class="branch-label yes">Legible →</div>
+        <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+        <div class="node node-ai" style="width:100%">
+          <div class="node-title" style="font-size:12px">Verificación de contenido</div>
+          <div class="node-sub">¿Es efectivamente el tipo de doc esperado?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-ai" style="max-width:500px">
+      <span class="node-icon">🔎</span>
+      <div class="node-title">Verificación de contenido con Vision AI</div>
+      <div class="node-sub">Confirma que la imagen sea efectivamente el documento pedido</div>
+      <div class="node-tech">
+        <span class="tech-tag">GPT-4o Vision</span>
+        Prompt: <em>"¿Esta imagen es un [tipo_doc esperado]? Ej: DNI argentino parte frontal. Responde: coincide | no_coincide | dudoso + razón"</em><br>
+        Si <code>dudoso</code>: se guarda con estado <code>pendiente_revision_manual</code> y se avisa a un admin.
+      </div>
+    </div>
+
+    <div class="branch-wrap" style="margin:0">
+      <div class="branch-side">
+        <div class="branch-label no">No coincide →</div>
+        <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+        <div class="node node-err" style="width:100%">
+          <div class="node-title" style="font-size:12px">Notifica contenido incorrecto</div>
+          <div class="node-sub">"Recibimos una imagen pero no parece ser el DNI frente. ¿Podés reenviarlo?"</div>
+        </div>
+      </div>
+      <div class="branch-side">
+        <div class="branch-label yes">Coincide →</div>
+        <div class="arrow" style="height:24px"><div class="arrow-head"></div></div>
+        <div class="node node-db" style="width:100%">
+          <div class="node-title" style="font-size:12px">Subir a Supabase Storage</div>
+          <div class="node-sub"><code style="font-size:10px;color:var(--slate)">docs/{prestacion_id}/{tipo}/{ts_hash}.ext</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-db" style="max-width:500px">
+      <span class="node-icon">💾</span>
+      <div class="node-title">Registrar en tabla documentos</div>
+      <div class="node-sub">estado: pendiente_revision · storage_path · prestacion_id · tipo_doc · timestamp</div>
+      <div class="node-tech">
+        <span class="tech-tag">POST /api/documentos</span>
+        Body incluye resultado de las dos validaciones IA como metadata
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-sys" style="max-width:500px">
+      <span class="node-icon">✅</span>
+      <div class="node-title">Confirmar recepción a la familia</div>
+      <div class="node-sub">"Recibimos el [tipo_doc]. En caso de alguna observación del equipo te avisamos."</div>
+    </div>
+
+  </div>
+
+  <div class="info-box amber" style="margin-top:24px">
+    <strong>Trazabilidad:</strong> la ruta <code style="color:var(--amber)">docs/{prestacion_id}/{tipo_doc}/{ts_hash}.ext</code> garantiza que DNI frente y dorso son archivos distintos pero claramente vinculados. El hash evita duplicados. El campo <code style="color:var(--amber)">tipo_doc</code> lo determina el clasificador (caption + Vision), no el nombre del archivo original.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: EMPLEADOS
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-empleados">
+  <div class="section-header">
+    <div class="eyebrow">Actor / RETAS · RET</div>
+    <h2>Flujo de empleados</h2>
+    <p>Los empleados envían reportes al sistema y reciben notificaciones de acreditación de sueldo.</p>
+  </div>
+
+  <div class="legend">
+    <span class="leg"><span class="leg-dot" style="background:#4ADE80"></span>Sistema</span>
+    <span class="leg"><span class="leg-dot" style="background:#9B7FFF"></span>Empleado</span>
+    <span class="leg"><span class="leg-dot" style="background:#F0A030"></span>Decisión</span>
+    <span class="leg"><span class="leg-dot" style="background:#4A9EFF"></span>IA (Whisper)</span>
+    <span class="leg"><span class="leg-dot" style="background:#7A8BA8"></span>BDD</span>
+  </div>
+
+  <div class="flow-cols">
+    <div>
+      <div class="flow-col-header">Empleado → Sistema (informe)</div>
+      <div class="flow">
+
+        <div class="node node-user">
+          <span class="node-icon">💬</span>
+          <div class="node-title">Empleado envía mensaje</div>
+          <div class="node-sub">Texto libre, audio (ogg/mp3) o screenshot de conversación</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST /webhook</span>
+            Meta entrega: <code>from</code>, <code>type</code>, <code>text.body</code> o <code>audio.id</code> o <code>image.id</code>
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-api">
+          <span class="node-icon">🔍</span>
+          <div class="node-title">Lookup: ¿número registrado?</div>
+          <div class="node-sub">Recupera empleado_id y lista de prestaciones asignadas</div>
+          <div class="node-tech">
+            <span class="tech-tag">GET /api/wa/usuario?phone=</span>
+            Si tiene múltiples prestaciones → preguntar sobre cuál alumno es el informe
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-dec">
+          <span class="node-icon">📋</span>
+          <div class="node-title">Detectar tipo de contenido</div>
+          <div class="node-sub">text / audio / image — por campo <code>type</code> del webhook</div>
+          <div class="node-tech">
+            <span class="tech-tag">lógica Node.js</span>
+            Switch por <code>message.type</code>: "text" | "audio" | "image"
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-ai">
+          <span class="node-icon">🔊</span>
+          <div class="node-title">Si es audio: descargar y transcribir</div>
+          <div class="node-sub">El audio original se archiva. El texto transcripto se usa como contenido del informe.</div>
+          <div class="node-tech">
+            <span class="tech-tag">GET graph.facebook.com/{audio_id}</span>
+            → descarga binario ogg/mp4<br>
+            <span class="tech-tag">OpenAI Whisper whisper-1</span>
+            → devuelve texto en español. Fallback: guardar como "pendiente_transcripción" si falla.
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">🧩</span>
+          <div class="node-title">Estructurar informe</div>
+          <div class="node-sub">empleado_id · prestacion_id · tipo_contenido · contenido_texto · storage_path</div>
+          <div class="node-tech">
+            <span class="tech-tag">lógica Node.js</span>
+            El campo <code>prestacion_id</code> viene de la selección previa si el empleado tiene varias
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-db">
+          <span class="node-icon">💾</span>
+          <div class="node-title">Cargar en informes_empleados</div>
+          <div class="node-sub">estado: recibido</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST /api/informes</span>
+            Body: empleado_id, prestacion_id, tipo_contenido, contenido_texto, storage_path
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">✅</span>
+          <div class="node-title">Confirmar al empleado</div>
+          <div class="node-sub">"Informe registrado para [nombre alumno] ✓"</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flow-col-header">Sistema → Empleado (acreditación)</div>
+      <div class="flow">
+
+        <div class="node node-sys">
+          <span class="node-icon">⚙️</span>
+          <div class="node-title">Motor detecta acreditación de sueldo</div>
+          <div class="node-sub">Trigger contable: nueva fila en tabla de liquidaciones</div>
+          <div class="node-tech">
+            <span class="tech-tag">pg_cron o Supabase trigger</span>
+            ON INSERT en tabla <code>liquidaciones</code> → dispara función edge
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-api">
+          <span class="node-icon">👥</span>
+          <div class="node-title">Obtener empleados afectados con teléfono</div>
+          <div class="node-sub">Solo los que tienen phone_number registrado en usuarios_wa</div>
+          <div class="node-tech">
+            <span class="tech-tag">GET /api/liquidaciones/:id/empleados-wa</span>
+            JOIN entre liquidación → empleados → usuarios_wa
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">📄</span>
+          <div class="node-title">Construir payload del template</div>
+          <div class="node-sub">Nombre, monto, período, fecha de acreditación</div>
+          <div class="node-tech">
+            <span class="tech-tag">template: acreditacion_sueldo</span>
+            Variables: {{1}} nombre, {{2}} período, {{3}} monto, {{4}} fecha
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-sys">
+          <span class="node-icon">📤</span>
+          <div class="node-title">POST a Meta Cloud API por cada empleado</div>
+          <div class="node-sub">Un mensaje individual por número. Template pre-aprobado requerido.</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST graph.facebook.com/{phone_id}/messages</span>
+            Loop por empleado. Reintento automático si falla (max 3).
+          </div>
+        </div>
+        <div class="arrow"><div class="arrow-head"></div></div>
+
+        <div class="node node-db">
+          <span class="node-icon">💾</span>
+          <div class="node-title">Registrar envío en eventos_log</div>
+          <div class="node-sub">estado · timestamp · message_id retornado por Meta</div>
+          <div class="node-tech">
+            <span class="tech-tag">POST /api/eventos-log</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box purple" style="margin-top:18px">
+        <strong>RETAS vs RET:</strong> mismo flujo WA. El campo <code style="color:var(--purple)">tipo_empleado</code> en <code>usuarios_wa</code> permite filtrar si en el futuro se necesitan templates o permisos diferenciados.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: SISTEMA
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-sistema">
+  <div class="section-header">
+    <div class="eyebrow">Eventos automáticos</div>
+    <h2>Motor de eventos del sistema</h2>
+    <p>Todos los mensajes salientes iniciados por el sistema siguen el mismo flujo base.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
+    <div class="node node-sys" style="max-width:none">
+      <span class="node-icon">📂</span>
+      <div class="node-title">Docs faltantes o rechazados</div>
+      <div class="node-sub">Destino: familia</div>
+      <div class="node-tech"><span class="tech-tag">trigger: estado doc = rechazado</span></div>
+    </div>
+    <div class="node node-sys" style="max-width:none">
+      <span class="node-icon">💰</span>
+      <div class="node-title">Acreditación de sueldo</div>
+      <div class="node-sub">Destino: empleado/s</div>
+      <div class="node-tech"><span class="tech-tag">trigger: INSERT en liquidaciones</span></div>
+    </div>
+    <div class="node node-sys" style="max-width:none">
+      <span class="node-icon">⏰</span>
+      <div class="node-title">Vencimiento de documento</div>
+      <div class="node-sub">Destino: familia</div>
+      <div class="node-tech"><span class="tech-tag">cron: diario, 09:00 AR</span></div>
+    </div>
+  </div>
+
+  <div class="flow">
+    <div class="node node-sys" style="max-width:520px">
+      <span class="node-icon">⚙️</span>
+      <div class="node-title">Trigger: cron job o cambio de estado en BDD</div>
+      <div class="node-tech"><span class="tech-tag">pg_cron (Supabase)</span> o <span class="tech-tag">node-cron</span> en backend</div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-api" style="max-width:520px">
+      <span class="node-icon">🎯</span>
+      <div class="node-title">Identificar destinatarios con teléfono registrado</div>
+      <div class="node-tech">
+        <span class="tech-tag">GET /api/wa/usuario?prestacion_id=&amp;rol=</span>
+        Filtra solo los que tienen phone_number en usuarios_wa
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-dec" style="max-width:520px">
+      <span class="node-icon">📋</span>
+      <div class="node-title">Construir payload del template Meta</div>
+      <div class="node-sub">template_name + language_code + components con variables dinámicas</div>
+      <div class="node-tech"><span class="tech-tag">todos los templates pre-aprobados en Meta Business</span></div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-sys" style="max-width:520px">
+      <span class="node-icon">📤</span>
+      <div class="node-title">POST a Meta Cloud API</div>
+      <div class="node-tech">
+        <span class="tech-tag">POST graph.facebook.com/v19.0/{phone_number_id}/messages</span>
+        Header: Authorization Bearer {WHATSAPP_TOKEN}
+      </div>
+    </div>
+    <div class="arrow"><div class="arrow-head"></div></div>
+
+    <div class="node node-db" style="max-width:520px">
+      <span class="node-icon">💾</span>
+      <div class="node-title">Registrar resultado en eventos_log</div>
+      <div class="node-tech">
+        <span class="tech-tag">POST /api/eventos-log</span>
+        Guarda message_id de Meta para tracking de delivery
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: STACK
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-stack">
+  <div class="section-header">
+    <div class="eyebrow">Arquitectura técnica</div>
+    <h2>Stack tecnológico</h2>
+    <p>Construido sobre la base existente de SAIE. Dos dependencias externas nuevas.</p>
+  </div>
+
+  <div class="stack-layers">
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span class="layer-icon">📱</span>Capa de mensajería</div>
+        <span class="stack-layer-badge">entrada + salida</span>
+      </div>
+      <div class="stack-items">
+        <div class="stack-item">
+          <div class="stack-item-name">Meta WhatsApp Cloud API</div>
+          <div class="stack-item-role">Webhook entrante · Envío saliente</div>
+          <div class="stack-item-note">Número de negocio dedicado. Templates aprobados requeridos para mensajes salientes iniciados por sistema.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Express POST /webhook</div>
+          <div class="stack-item-role">Handler del webhook de Meta</div>
+          <div class="stack-item-note">Verifica x-hub-signature-256. Responde 200 inmediatamente, procesa en background.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-connector">↓</div>
+
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span class="layer-icon">🔧</span>Backend (existente en SAIE)</div>
+        <span class="stack-layer-badge">Node.js / Express</span>
+      </div>
+      <div class="stack-items">
+        <div class="stack-item">
+          <div class="stack-item-name">Router de actores</div>
+          <div class="stack-item-role">Identifica rol por phone_number</div>
+          <div class="stack-item-note">lookup usuarios_wa → familia | empleado | desconocido → onboarding</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Clasificador de docs</div>
+          <div class="stack-item-role">caption + mime_type → tipo_doc</div>
+          <div class="stack-item-note">Tabla de tipos esperados por prestación. Si ambiguo → pregunta al usuario.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Motor de eventos</div>
+          <div class="stack-item-role">Triggers de envíos salientes</div>
+          <div class="stack-item-note">pg_cron (Supabase) o node-cron. Recomendado: pg_cron para no depender del backend activo.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Gestor de sesiones</div>
+          <div class="stack-item-role">Estado de conversaciones en curso</div>
+          <div class="stack-item-note">Tabla sesiones_wa con paso actual del onboarding o flujo multi-step.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-connector">↓</div>
+
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span class="layer-icon">🧠</span>Servicios de IA</div>
+        <span class="stack-layer-badge">2 integraciones nuevas</span>
+      </div>
+      <div class="stack-items">
+        <div class="stack-item">
+          <div class="stack-item-name">GPT-4o Vision</div>
+          <div class="stack-item-role">Validación de documentos (2 pasos)</div>
+          <div class="stack-item-note">1º legibilidad · 2º verificación de tipo. Prompt estructurado con respuesta enum para control de flujo.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">OpenAI Whisper</div>
+          <div class="stack-item-role">Transcripción de audios de empleados</div>
+          <div class="stack-item-note">Modelo whisper-1. Input: buffer ogg/mp4. Output: texto en español.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-connector">↓</div>
+
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span class="layer-icon">🗄️</span>Base de datos + Storage</div>
+        <span class="stack-layer-badge">Supabase / PostgreSQL</span>
+      </div>
+      <div class="stack-items">
+        <div class="stack-item">
+          <div class="stack-item-name">Tablas existentes</div>
+          <div class="stack-item-role">prestaciones · empleados · familias</div>
+          <div class="stack-item-note">No se modifican. Solo se leen via API interna.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Tablas nuevas</div>
+          <div class="stack-item-role">usuarios_wa · documentos · informes_empleados · eventos_log · sesiones_wa</div>
+          <div class="stack-item-note">Toda la capa WA nueva se aísla en estas tablas.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-item-name">Supabase Storage</div>
+          <div class="stack-item-role">Bucket: saie-docs</div>
+          <div class="stack-item-note">Path: docs/{prestacion_id}/{tipo_doc}/{ts_hash}.ext · audios/{empleado_id}/{ts}.ogg</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: ENDPOINTS
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-endpoints">
+  <div class="section-header">
+    <div class="eyebrow">Integración con BDD</div>
+    <h2>Endpoints necesarios</h2>
+    <p>Endpoints que la capa WhatsApp necesita consumir de la BDD existente de SAIE. Son hipótesis a confirmar contra el esquema real — los nombres de campos pueden variar.</p>
+  </div>
+
+  <div class="info-box blue">
+    <strong>Convención:</strong> todos los endpoints asumen que el backend ya autentica via JWT o API key interna. Los campos en <code style="color:var(--blue)">snake_case</code> son hipotéticos y deben ajustarse al esquema real.
+  </div>
+
+  <div class="endpoints" style="margin-top:20px">
+
+    <!-- EP 1 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/wa/usuario</span>
+        <span class="ep-desc">Buscar usuario registrado por teléfono o entidad</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Query params</div>
+        <pre><span class="k">phone</span>=<span class="s">"+5491112345678"</span>      <span class="c">// lookup principal en el webhook</span>
+<span class="k">prestacion_id</span>=<span class="s">"uuid"</span>       <span class="c">// para encontrar el teléfono de una familia</span>
+<span class="k">rol</span>=<span class="s">"familia|empleado"</span>      <span class="c">// combinable con prestacion_id</span></pre>
+        <div class="ep-section-label">Response 200</div>
+        <pre>{
+  <span class="k">"id"</span>:           <span class="s">"uuid"</span>,
+  <span class="k">"phone_number"</span>: <span class="s">"+5491112345678"</span>,
+  <span class="k">"rol"</span>:          <span class="s">"familia"</span>,
+  <span class="k">"tipo_empleado"</span>: <span class="n">null</span>,
+  <span class="k">"prestacion_id"</span>: <span class="s">"uuid"</span>,   <span class="c">// si rol = familia</span>
+  <span class="k">"empleado_id"</span>:   <span class="s">"uuid"</span>,   <span class="c">// si rol = empleado</span>
+  <span class="k">"activo"</span>: <span class="n">true</span>
+}</pre>
+        <div class="ep-section-label">Response 404</div>
+        <pre>{ <span class="k">"error"</span>: <span class="s">"not_found"</span> }   <span class="c">// → disparar flujo de onboarding</span></pre>
+      </div>
+    </div>
+
+    <!-- EP 2 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post">POST</span>
+        <span class="ep-path">/api/wa/usuario</span>
+        <span class="ep-desc">Registrar número nuevo (onboarding completado)</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Body</div>
+        <pre>{
+  <span class="k">"phone_number"</span>: <span class="s">"+5491112345678"</span>,
+  <span class="k">"rol"</span>:          <span class="s">"familia"</span>,
+  <span class="k">"tipo_empleado"</span>: <span class="n">null</span>,
+  <span class="k">"prestacion_id"</span>: <span class="s">"uuid"</span>,   <span class="c">// requerido si rol = familia</span>
+  <span class="k">"empleado_id"</span>:   <span class="s">"uuid"</span>    <span class="c">// requerido si rol = empleado</span>
+}</pre>
+        <div class="ep-section-label">Response 201</div>
+        <pre>{ <span class="k">"id"</span>: <span class="s">"uuid-nuevo"</span>, <span class="k">"created_at"</span>: <span class="s">"timestamp"</span> }</pre>
+      </div>
+    </div>
+
+    <!-- EP 3 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/prestaciones</span>
+        <span class="ep-desc">Buscar prestación por nombre de alumno (onboarding familia)</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Query params</div>
+        <pre><span class="k">nombre</span>=<span class="s">"Sofia Rodriguez"</span>   <span class="c">// búsqueda fuzzy recomendada (ilike %Sofia%)</span>
+<span class="k">activa</span>=<span class="n">true</span>              <span class="c">// solo prestaciones activas</span></pre>
+        <div class="ep-section-label">Response 200</div>
+        <pre>[{
+  <span class="k">"id"</span>:             <span class="s">"uuid"</span>,
+  <span class="k">"nombre_alumno"</span>:  <span class="s">"Sofía Rodríguez"</span>,
+  <span class="k">"estado"</span>:         <span class="s">"activa"</span>,
+  <span class="k">"docs_requeridos"</span>: [<span class="s">"dni_frente"</span>, <span class="s">"dni_dorso"</span>, <span class="s">"cert_escolar"</span>]  <span class="c">// hipótesis</span>
+}]</pre>
+      </div>
+    </div>
+
+    <!-- EP 4 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/prestaciones/:id/documentos-pendientes</span>
+        <span class="ep-desc">Obtener documentos faltantes o rechazados de una prestación</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Response 200</div>
+        <pre>{
+  <span class="k">"prestacion_id"</span>: <span class="s">"uuid"</span>,
+  <span class="k">"pendientes"</span>: [
+    {
+      <span class="k">"tipo_doc"</span>:        <span class="s">"dni_frente"</span>,
+      <span class="k">"estado"</span>:          <span class="s">"rechazado"</span>,
+      <span class="k">"motivo_rechazo"</span>:  <span class="s">"imagen borrosa"</span>
+    },
+    {
+      <span class="k">"tipo_doc"</span>:        <span class="s">"cert_escolar"</span>,
+      <span class="k">"estado"</span>:          <span class="s">"pendiente"</span>,
+      <span class="k">"motivo_rechazo"</span>:  <span class="n">null</span>
+    }
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <!-- EP 5 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post">POST</span>
+        <span class="ep-path">/api/documentos</span>
+        <span class="ep-desc">Registrar documento recibido y validado por IA</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Body</div>
+        <pre>{
+  <span class="k">"prestacion_id"</span>: <span class="s">"uuid"</span>,
+  <span class="k">"tipo_doc"</span>:      <span class="s">"dni_frente"</span>,
+  <span class="k">"storage_path"</span>:  <span class="s">"docs/uuid/dni_frente/1719000000_abc123.jpg"</span>,
+  <span class="k">"estado"</span>:        <span class="s">"pendiente_revision"</span>,
+  <span class="k">"ia_legibilidad"</span>: <span class="s">"legible"</span>,        <span class="c">// resultado Vision paso 1</span>
+  <span class="k">"ia_verificacion"</span>: <span class="s">"coincide"</span>,      <span class="c">// resultado Vision paso 2</span>
+  <span class="k">"vence_at"</span>:      <span class="n">null</span>
+}</pre>
+        <div class="ep-section-label">Response 201</div>
+        <pre>{ <span class="k">"id"</span>: <span class="s">"uuid-doc"</span>, <span class="k">"created_at"</span>: <span class="s">"timestamp"</span> }</pre>
+      </div>
+    </div>
+
+    <!-- EP 6 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/empleados</span>
+        <span class="ep-desc">Buscar empleado por nombre (onboarding empleado)</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Query params</div>
+        <pre><span class="k">nombre</span>=<span class="s">"Maria Gomez"</span>    <span class="c">// búsqueda fuzzy, ilike</span>
+<span class="k">activo</span>=<span class="n">true</span></pre>
+        <div class="ep-section-label">Response 200</div>
+        <pre>[{
+  <span class="k">"id"</span>:             <span class="s">"uuid"</span>,
+  <span class="k">"nombre"</span>:         <span class="s">"María Gómez"</span>,
+  <span class="k">"tipo"</span>:           <span class="s">"retas"</span>,
+  <span class="k">"prestaciones"</span>:  [<span class="s">"uuid-1"</span>, <span class="s">"uuid-2"</span>]  <span class="c">// IDs de prestaciones asignadas</span>
+}]</pre>
+      </div>
+    </div>
+
+    <!-- EP 7 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post">POST</span>
+        <span class="ep-path">/api/informes</span>
+        <span class="ep-desc">Registrar informe enviado por un empleado</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Body</div>
+        <pre>{
+  <span class="k">"empleado_id"</span>:    <span class="s">"uuid"</span>,
+  <span class="k">"prestacion_id"</span>:  <span class="s">"uuid"</span>,
+  <span class="k">"tipo_contenido"</span>: <span class="s">"audio"</span>,         <span class="c">// texto | audio | imagen</span>
+  <span class="k">"contenido_texto"</span>: <span class="s">"Hoy la sesión fue..."</span>,  <span class="c">// transcripción si audio</span>
+  <span class="k">"storage_path"</span>:   <span class="s">"audios/uuid/1719000000.ogg"</span>  <span class="c">// null si solo texto</span>
+}</pre>
+        <div class="ep-section-label">Response 201</div>
+        <pre>{ <span class="k">"id"</span>: <span class="s">"uuid-informe"</span>, <span class="k">"created_at"</span>: <span class="s">"timestamp"</span> }</pre>
+      </div>
+    </div>
+
+    <!-- EP 8 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/liquidaciones/:id/empleados-wa</span>
+        <span class="ep-desc">Empleados afectados por una liquidación con teléfono registrado</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Response 200</div>
+        <pre>[{
+  <span class="k">"empleado_id"</span>:  <span class="s">"uuid"</span>,
+  <span class="k">"nombre"</span>:       <span class="s">"María Gómez"</span>,
+  <span class="k">"phone_number"</span>: <span class="s">"+5491112345678"</span>,
+  <span class="k">"monto"</span>:        <span class="n">85000</span>,
+  <span class="k">"periodo"</span>:      <span class="s">"Junio 2025"</span>,
+  <span class="k">"fecha_acreditacion"</span>: <span class="s">"2025-06-25"</span>
+}]</pre>
+      </div>
+    </div>
+
+    <!-- EP 9 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post">POST</span>
+        <span class="ep-path">/api/eventos-log</span>
+        <span class="ep-desc">Registrar evento de comunicación saliente</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Body</div>
+        <pre>{
+  <span class="k">"tipo_evento"</span>:        <span class="s">"acreditacion_sueldo"</span>,
+  <span class="k">"destinatario_phone"</span>: <span class="s">"+5491112345678"</span>,
+  <span class="k">"prestacion_id"</span>:      <span class="s">"uuid"</span>,
+  <span class="k">"estado"</span>:             <span class="s">"enviado"</span>,
+  <span class="k">"meta_message_id"</span>:    <span class="s">"wamid.xxxx"</span>  <span class="c">// ID retornado por Meta API</span>
+}</pre>
+        <div class="ep-section-label">Response 201</div>
+        <pre>{ <span class="k">"id"</span>: <span class="s">"uuid-log"</span> }</pre>
+      </div>
+    </div>
+
+    <!-- EP 10 -->
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get">GET</span>
+        <span class="ep-path">/api/prestaciones/:id/docs-por-vencer</span>
+        <span class="ep-desc">Documentos próximos a vencer para alertas proactivas</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Query params</div>
+        <pre><span class="k">dias</span>=<span class="n">30</span>   <span class="c">// documentos que vencen en los próximos N días</span></pre>
+        <div class="ep-section-label">Response 200</div>
+        <pre>[{
+  <span class="k">"prestacion_id"</span>: <span class="s">"uuid"</span>,
+  <span class="k">"tipo_doc"</span>:      <span class="s">"cert_escolar"</span>,
+  <span class="k">"vence_at"</span>:      <span class="s">"2025-07-15"</span>,
+  <span class="k">"dias_restantes"</span>: <span class="n">21</span>
+}]</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-box" style="margin-top:24px">
+    <strong>Tabla sesiones_wa (adicional):</strong> necesaria para onboarding multi-step. Guarda el paso actual del flujo para cada <code style="color:var(--green)">phone_number</code> en proceso de registro. Se elimina o marca completa al finalizar el onboarding.
+  </div>
+
+  <!-- ── VARIABLES A VALIDAR POR ENDPOINT ── -->
+  <div class="section-header" style="margin-top:40px">
+    <div class="eyebrow">Checklist de integración</div>
+    <h2>Variables a revisar / agregar en la BDD</h2>
+    <p>Para cada endpoint, los campos que hay que confirmar que existen en el esquema real o agregar si no están.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px">
+
+    <!-- tabla usuarios_wa -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--green)">tabla nueva</span> &nbsp;usuarios_wa</div>
+        <span class="stack-layer-badge">crear desde cero</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Tipo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Estado</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Notas</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">gen_random_uuid()</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">phone_number</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text UNIQUE</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">formato E.164: +5491112345678. INDEX recomendado.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">rol</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">enum</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">valores: 'familia' | 'empleado'</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">tipo_empleado</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">enum nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">valores: 'retas' | 'ret' | null. Solo si rol = empleado.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">prestacion_id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid FK nullable</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">FK → prestaciones.id. ¿Existe tabla prestaciones con este nombre exacto?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">empleado_id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid FK nullable</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">FK → empleados.id. ¿Existe tabla empleados con este nombre exacto?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">activo</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">bool</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">default true. Para dar de baja sin borrar.</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">created_at</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">timestamptz</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">now()</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- tabla documentos -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--green)">tabla nueva</span> &nbsp;documentos</div>
+        <span class="stack-layer-badge">crear desde cero</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Tipo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Estado</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Notas</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">gen_random_uuid()</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">prestacion_id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid FK</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Nombre exacto de la tabla y columna PK de prestaciones?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">tipo_doc</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Valores posibles a definir: 'dni_frente','dni_dorso','cert_escolar','carnet_discapacidad',… Hacer enum cuando la lista sea definitiva.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">storage_path</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Path relativo dentro del bucket saie-docs.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">estado</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">enum</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">'pendiente_revision' | 'aprobado' | 'rechazado' | 'pendiente_revision_manual'</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">motivo_rechazo</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Texto libre. Se muestra al usuario si hay rechazo.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">ia_legibilidad</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Resultado Vision paso 1: 'legible' | 'ilegible'. Para auditoría.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">ia_verificacion</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Resultado Vision paso 2: 'coincide' | 'no_coincide' | 'dudoso'.</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">vence_at</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">date nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">null si el doc no vence. Usado por el motor de alertas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- tabla prestaciones (existente) -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--amber)">tabla existente</span> &nbsp;prestaciones</div>
+        <span class="stack-layer-badge">solo leer · confirmar campos</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo hipotético</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Uso</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Estado</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">A confirmar</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">id</td><td style="padding:7px 12px;color:var(--text-2)">FK en usuarios_wa y documentos</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Es uuid? ¿Nombre exacto de la columna?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">nombre_alumno</td><td style="padding:7px 12px;color:var(--text-2)">Búsqueda en onboarding familia</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Es un campo directo o se arma desde nombre + apellido?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">estado</td><td style="padding:7px 12px;color:var(--text-2)">Filtrar solo prestaciones activas</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Qué valores puede tener? ¿Cuál representa "activa"?</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">docs_requeridos</td><td style="padding:7px 12px;color:var(--text-2)">Lista de docs a pedir por prestación</td><td style="padding:7px 12px"><span style="color:var(--coral);font-size:11px">✕ probablemente no existe</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Hay una tabla separada con los tipos de doc requeridos por prestación, o es una columna array?</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- tabla empleados (existente) -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--amber)">tabla existente</span> &nbsp;empleados</div>
+        <span class="stack-layer-badge">solo leer · confirmar campos</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo hipotético</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Uso</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Estado</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">A confirmar</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">id</td><td style="padding:7px 12px;color:var(--text-2)">FK en usuarios_wa e informes</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Es uuid? ¿Nombre exacto?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">nombre</td><td style="padding:7px 12px;color:var(--text-2)">Búsqueda en onboarding empleado</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿nombre completo en un campo o separado en nombre + apellido?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">tipo / rol</td><td style="padding:7px 12px;color:var(--text-2)">Distinguir RETAS de RET</td><td style="padding:7px 12px"><span style="color:var(--coral);font-size:11px">✕ confirmar existencia</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Existe un campo que distingue RETAS de RET en la tabla actual?</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">prestaciones (relación)</td><td style="padding:7px 12px;color:var(--text-2)">Saber a qué alumno/s atiende</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Hay tabla intermedia empleado_prestacion o es un array en empleados?</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">activo</td><td style="padding:7px 12px;color:var(--text-2)">Filtrar empleados activos en liquidaciones</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar</span></td><td style="padding:7px 12px;color:var(--text-2)">¿Existe un campo de estado/activo? ¿Qué valor tiene un empleado activo?</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- tabla informes_empleados nueva -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--green)">tabla nueva</span> &nbsp;informes_empleados</div>
+        <span class="stack-layer-badge">crear desde cero</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Tipo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Estado</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Notas</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">gen_random_uuid()</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">empleado_id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid FK</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar FK</span></td><td style="padding:7px 12px;color:var(--text-2)">FK → empleados.id</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">prestacion_id</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">uuid FK</td><td style="padding:7px 12px"><span style="color:var(--amber);font-size:11px">⚠ confirmar FK</span></td><td style="padding:7px 12px;color:var(--text-2)">FK → prestaciones.id</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">tipo_contenido</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">enum</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">'texto' | 'audio' | 'imagen'</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">contenido_texto</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">Mensaje directo (si texto) o transcripción Whisper (si audio).</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">storage_path</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text nullable</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">null si tipo_contenido = 'texto'. audios/{empleado_id}/{ts}.ogg</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">created_at</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">timestamptz</td><td style="padding:7px 12px"><span style="color:#4ADE80;font-size:11px">● crear</span></td><td style="padding:7px 12px;color:var(--text-2)">now()</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- sesiones_wa nueva -->
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="font-family:var(--mono);font-size:12px;color:var(--green)">tabla nueva</span> &nbsp;sesiones_wa</div>
+        <span class="stack-layer-badge">para onboarding multi-step</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Campo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Tipo</th>
+            <th style="text-align:left;padding:7px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);font-size:11px">Notas</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">phone_number</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text PK</td><td style="padding:7px 12px;color:var(--text-2)">Clave principal. Una sesión activa por número.</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">paso_actual</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">text</td><td style="padding:7px 12px;color:var(--text-2)">ej: 'esperando_rol' | 'esperando_nombre_alumno' | 'esperando_confirmacion'</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">datos_parciales</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">jsonb</td><td style="padding:7px 12px;color:var(--text-2)">Acumula respuestas hasta completar el onboarding. Ej: {"rol":"familia","nombre_buscado":"Sofía R"}</td></tr>
+            <tr><td style="padding:7px 12px;font-family:var(--mono);color:var(--text-1)">updated_at</td><td style="padding:7px 12px;font-family:var(--mono);color:var(--purple)">timestamptz</td><td style="padding:7px 12px;color:var(--text-2)">Para expirar sesiones incompletas con cron (ej: > 24hs sin actividad).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- end variables grid -->
+</div><!-- end endpoints panel -->
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: META API SETUP
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-meta">
+  <div class="section-header">
+    <div class="eyebrow">Configuración externa</div>
+    <h2>Setup de Meta WhatsApp Cloud API</h2>
+    <p>Guía paso a paso con tiempos reales, trabas conocidas y cómo resolverlas. El número personal no se puede usar — se desactiva de WhatsApp al registrarlo en la API.</p>
+  </div>
+
+  <!-- RESUMEN DE TIEMPOS -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+    <div class="node node-sys" style="max-width:none">
+      <div class="node-title">Tiempo activo tuyo</div>
+      <div class="node-sub" style="margin-top:6px">~1 hora de trabajo real repartida en 2 días. El resto es esperar aprobaciones de Meta.</div>
+    </div>
+    <div class="node node-dec" style="max-width:none">
+      <div class="node-title">Espera de aprobaciones</div>
+      <div class="node-sub" style="margin-top:6px">Display name: 1–3 días hábiles. Templates UTILITY: horas a 1 día. Verificación empresarial: 2–7 días (opcional al inicio).</div>
+    </div>
+    <div class="node node-ai" style="max-width:none">
+      <div class="node-title">Cuándo podés desarrollar</div>
+      <div class="node-sub" style="margin-top:6px">Desde el día 1, con el número de test de Meta. No necesitás esperar el display name para escribir código.</div>
+    </div>
+  </div>
+
+  <div class="info-box amber">
+    <strong>⚠ Número personal:</strong> al registrar un número en la Cloud API, ese número queda <em>desvinculado de la app de WhatsApp</em>. No se puede usar en la app y en la API al mismo tiempo (salvo modo "Coexistence", disponible en UE/UK/Sudáfrica — no Argentina todavía). Usá una SIM prepaga nueva o un número que no uses en el día a día.
+  </div>
+
+  <!-- Checklist prereqs -->
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0">
+    <div class="rule-card">
+      <div class="rule-num">📱</div>
+      <div>
+        <h4>Número dedicado</h4>
+        <p>SIM prepaga nueva argentina (cualquier operadora, ~$500 ARS). Que pueda recibir SMS o llamada para el código de verificación. No debe estar activo en WhatsApp.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">🏢</div>
+      <div>
+        <h4>Meta Business Portfolio</h4>
+        <p>Una cuenta de Facebook. Se crea automáticamente al crear la app si no tenés. No necesita ser una página, solo la cuenta personal.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">🌐</div>
+      <div>
+        <h4>Sitio web del Centro</h4>
+        <p>El Centro Paso a Paso necesita tener un sitio web o página online donde aparezca su nombre <strong>exactamente igual</strong> al display name que van a pedir. Meta lo verifica.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">📄</div>
+      <div>
+        <h4>Documentos para verificación (opcionales al inicio)</h4>
+        <p>CUIT o constancia AFIP del Centro. Necesarios solo para verificación empresarial. No bloquean el desarrollo inicial.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASOS -->
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">1</span>
+        <span class="ep-path">Crear app en Meta for Developers</span>
+        <span class="ep-desc">⏱ 10 min · Sin espera</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Pasos</div>
+        <pre>1. Ir a <span class="k">developers.facebook.com</span> → My Apps → Create App
+2. Tipo: <span class="s">"Business"</span>
+3. Nombre: <span class="s">"Centro Paso a Paso SAIE"</span>
+4. En "Add products" → buscar <span class="k">WhatsApp</span> → Set Up
+5. Crear o vincular <span class="k">Meta Business Portfolio</span> (automático si es la primera vez)</pre>
+        <div class="ep-section-label">Qué anotar</div>
+        <pre><span class="k">App ID</span>          → visible en el dashboard del app
+<span class="k">WABA ID</span>         → WhatsApp Business Account ID (en API Setup panel)
+<span class="k">Phone Number ID</span> → número de test asignado automáticamente por Meta (para dev)</pre>
+        <div class="ep-section-label">⚠ Traba posible</div>
+        <pre><span class="c">// Si ya usás la cuenta de Facebook para Ads de otros clientes (Creative Coefficient),
+// puede que ya tengas un Business Portfolio. Usalo — no crear uno nuevo.
+// Crear múltiples portfolios con la misma cuenta puede causar restricciones.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">2</span>
+        <span class="ep-path">Agregar el número de producción</span>
+        <span class="ep-desc">⏱ 15 min activos · Sin espera para el número en sí</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Pasos</div>
+        <pre>1. App Dashboard → WhatsApp → API Setup → <span class="k">Add phone number</span>
+2. Ingresar el número en formato E.164: <span class="s">+549XXXXXXXXXX</span>
+3. Elegir verificación: <span class="s">SMS</span> (recomendado) o llamada
+4. Ingresar el código de 6 dígitos recibido
+5. Configurar <span class="k">Display Name</span>: <span class="s">"Centro Paso a Paso"</span></pre>
+        <div class="ep-section-label">⚠ Trabas posibles</div>
+        <pre><span class="c">// TRABA 1: El número ya está en WhatsApp
+// El número nuevo de la SIM prepaga puede recibir el SMS de WhatsApp al activar la SIM.
+// Solución: no instalar WhatsApp en ese número. Si ya se instaló, eliminarlo desde
+// la app antes de registrarlo en la API (Settings → Account → Delete my account).</span>
+
+<span class="c">// TRABA 2: No llega el SMS de verificación
+// Ocurre con algunos números VoIP o prepagos recién activados.
+// Solución: elegir "llamada" en lugar de SMS, o esperar 24hs y reintentar.</span>
+
+<span class="c">// TRABA 3: Display name rechazado (ver paso detallado abajo)
+// El display name va a revisión de Meta — puede tardar y puede rechazarse.
+// Solución: seguir desarrollando con el número de test mientras se aprueba.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">3</span>
+        <span class="ep-path">Display name — la principal fuente de fricción</span>
+        <span class="ep-desc">⏱ 5 min cargar · ⏳ 1–3 días hábiles de espera</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Reglas clave para que se apruebe al primer intento</div>
+        <pre><span class="s">✓</span> Debe coincidir <span class="k">exactamente</span> con el nombre en el sitio web del Centro
+<span class="s">✓</span> Sin emojis, sin signos de puntuación extra, sin mayúsculas completas
+<span class="s">✓</span> Sin palabras genéricas ("Soporte", "Atención", "Info")
+<span class="s">✓</span> Mínimo 3 caracteres
+<span class="s">✓</span> Si el nombre legal difiere del nombre visible → usar "NombreVisible by Organización Legal"
+
+Ejemplo correcto para SAIE:   <span class="k">"Centro Paso a Paso"</span>
+Ejemplo incorrecto:           <span class="s">"CENTRO PASO A PASO - ATENCIÓN"</span> (todo mayúsculas + genérico)</pre>
+        <div class="ep-section-label">⚠ Causas de rechazo más frecuentes</div>
+        <pre><span class="c">// 1. Nombre no aparece en el sitio web del Centro
+//    → El sitio debe tener el nombre exacto visible. Si el Centro no tiene web,
+//    crear al menos una landing simple antes de solicitar el display name.</span>
+
+<span class="c">// 2. Nombre inconsistente con el Business Manager
+//    → Si el Business Portfolio se llama "Creative Coefficient" y el display
+//    name es "Centro Paso a Paso", Meta puede pedirte que justifiques la relación.
+//    Solución: crear el Business Portfolio a nombre del Centro directamente,
+//    o agregar "Centro Paso a Paso" como asset en el portfolio existente.</span>
+
+<span class="c">// 3. Meta solo revisa el display name DESPUÉS de los 2,000 mensajes sin verificación
+//    → Sin verificación empresarial el límite es 250 msgs/día. A ese ritmo tardás
+//    8+ días en llegar a 2,000. Solución: completar verificación empresarial para
+//    saltar directamente a la revisión del display name.</span></pre>
+        <div class="ep-section-label">Si te lo rechazan</div>
+        <pre>1. Ir a <span class="k">business.facebook.com/direct-support/</span>
+2. Request Type: <span class="s">"Appeal display name rejection"</span>
+3. Adjuntar: captura del sitio web mostrando el nombre + documento legal si existe
+4. Tiempo de respuesta al appeal: 24–48 hs
+5. Si el segundo rechazo es injustificado → escalar a soporte premium de Meta (requiere cuenta verificada)</pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="min-width:28px;text-align:center">4</span>
+        <span class="ep-path">Generar token permanente (System User)</span>
+        <span class="ep-desc">⏱ 15 min · Sin espera</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Pasos</div>
+        <pre>1. <span class="k">business.facebook.com</span> → Configuración → Usuarios del sistema → Agregar
+2. Nombre: <span class="s">"saie-backend"</span>, rol: Empleado
+3. Seleccionar → Asignar activos:
+   - Apps → SAIE app → Full control
+   - WhatsApp accounts → Centro Paso a Paso → Full control
+4. Generar token → permisos mínimos:
+   <span class="s">whatsapp_business_messaging</span>
+   <span class="s">whatsapp_business_management</span>
+5. <span class="k">Copiar y guardar — no se puede ver de nuevo</span></pre>
+        <div class="ep-section-label">Variables de entorno a guardar</div>
+        <pre><span class="k">WHATSAPP_TOKEN</span>=<span class="s">"EAAxxxxxxxx..."</span>   <span class="c">// token permanente del system user</span>
+<span class="k">PHONE_NUMBER_ID</span>=<span class="s">"1234567890"</span>      <span class="c">// ID del número de producción</span>
+<span class="k">WABA_ID</span>=<span class="s">"9876543210"</span>              <span class="c">// WhatsApp Business Account ID</span></pre>
+        <div class="ep-section-label">⚠ Trabas posibles</div>
+        <pre><span class="c">// TRABA: Token expira silenciosamente
+// El token de System User es "permanente" pero Meta puede invalidarlo si:
+// - Se cambia la contraseña de la cuenta de Facebook
+// - Hay actividad sospechosa en el Business Manager
+// - El app pasa a modo restringido
+// Solución: monitorear errores 190 (token inválido) en producción y tener
+// un flujo de renovación documentado.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="min-width:28px;text-align:center">5</span>
+        <span class="ep-path">Configurar el webhook</span>
+        <span class="ep-desc">⏱ 20 min · Sin espera</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Endpoint Node.js</div>
+        <pre><span class="c">// GET /webhook — verificación inicial por Meta</span>
+app.get(<span class="s">'/webhook'</span>, (req, res) => {
+  <span class="k">const</span> mode      = req.query[<span class="s">'hub.mode'</span>];
+  <span class="k">const</span> token     = req.query[<span class="s">'hub.verify_token'</span>];
+  <span class="k">const</span> challenge = req.query[<span class="s">'hub.challenge'</span>];
+  <span class="k">if</span> (mode === <span class="s">'subscribe'</span> && token === process.env.<span class="k">WEBHOOK_VERIFY_TOKEN</span>) {
+    res.status(200).send(challenge);
+  } <span class="k">else</span> { res.sendStatus(403); }
+});
+
+<span class="c">// POST /webhook — mensajes entrantes</span>
+app.post(<span class="s">'/webhook'</span>, (req, res) => {
+  res.sendStatus(200);        <span class="c">// responder 200 INMEDIATAMENTE</span>
+  processMessage(req.body);   <span class="c">// procesar en background</span>
+});</pre>
+        <div class="ep-section-label">⚠ Trabas posibles</div>
+        <pre><span class="c">// TRABA 1: Webhook no verifica (403)
+// La causa más común: el WEBHOOK_VERIFY_TOKEN no coincide exactamente.
+// Es case-sensitive. Un espacio al final lo rompe.
+// Solución: copiar el token del .env directamente, sin espacios.</span>
+
+<span class="c">// TRABA 2: Meta deja de enviar mensajes al webhook
+// Ocurre si el webhook devuelve errores 5xx más de cierta cantidad de veces.
+// Meta suspende temporalmente las entregas y las encola.
+// Solución: SIEMPRE responder 200 inmediatamente, procesar en background.
+// Nunca hacer lógica pesada antes de responder al webhook.</span>
+
+<span class="c">// TRABA 3 (2026): BSUID reemplaza phone_number
+// Meta está migrando el campo `from` de phone_number a Business-Scoped User ID.
+// Los campos `wa_id` y `phone_number` pueden venir null en nuevas integraciones.
+// Solución: mapear BSUID → usuario en usuarios_wa además del phone.</span>
+
+<span class="c">// Para desarrollo: usar ngrok o tunnelmole para exponer localhost.
+// ngrok http 3000 → obtiene URL pública HTTPS temporal.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="min-width:28px;text-align:center">6</span>
+        <span class="ep-path">Templates de mensaje</span>
+        <span class="ep-desc">⏱ 20 min crear · ⏳ horas a 1 día para UTILITY</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Templates mínimos para SAIE</div>
+        <pre><span class="k">docs_requeridos</span>       → Categoría: <span class="s">UTILITY</span>
+  "Hola {{1}}, necesitamos que nos envíes los siguientes documentos: {{2}}"
+
+<span class="k">acreditacion_sueldo</span>   → Categoría: <span class="s">UTILITY</span>
+  "Hola {{1}}, se acreditó tu sueldo de {{2}}. Monto: {{3}}. Fecha: {{4}}"
+
+<span class="k">documento_vencimiento</span> → Categoría: <span class="s">UTILITY</span>
+  "Hola {{1}}, el documento {{2}} vence el {{3}}."
+
+<span class="k">bienvenida_registro</span>   → Categoría: <span class="s">UTILITY</span>
+  "Hola, soy el asistente de Centro Paso a Paso. Para registrarte, ¿cuál es tu rol?"</pre>
+        <div class="ep-section-label">⚠ Causas de rechazo de templates</div>
+        <pre><span class="c">// 1. Contenido ambiguo o genérico
+//    "Hola, tenemos novedades para vos" → rechazado (no específico)
+//    "Hola {{1}}, tu documento {{2}} está pendiente" → aprobado</span>
+
+<span class="c">// 2. Falta variable de opt-out en templates de MARKETING
+//    Los de UTILITY no lo requieren, pero si Meta los reclasifica como
+//    MARKETING por el contenido, los rechaza. Evitar lenguaje promocional.</span>
+
+<span class="c">// 3. Template categorizado como MARKETING cuando debería ser UTILITY
+//    Meta puede reclasificar. "Recordatorio de pago" puede ser UTILITY,
+//    "Aprovechá nuestro descuento" es MARKETING. Para SAIE, mantener
+//    el lenguaje transaccional/informativo.</span>
+
+<span class="c">// Si un template es rechazado: revisar el motivo en WhatsApp Manager,
+// corregir el texto y reenviar. Sin posibilidad de apelar templates (solo display names).</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">7</span>
+        <span class="ep-path">Verificación empresarial (opcional para el MVP)</span>
+        <span class="ep-desc">⏱ 20 min · ⏳ 2–7 días hábiles de espera</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Por qué esperar para esto</div>
+        <pre>Sin verificar:  250 conversaciones únicas/24hs → suficiente para el MVP
+Con verificar:  1,000+ conversaciones/24hs → necesario en producción real
+
+Recomendación: empezar sin verificación, hacerla durante el desarrollo.</pre>
+        <div class="ep-section-label">Documentos aceptados para Argentina</div>
+        <pre>Opción A: <span class="k">Constancia de inscripción AFIP</span> (con CUIT y razón social del Centro)
+Opción B: <span class="k">Acta constitutiva o estatuto</span> de la organización
+Opción C: <span class="k">Factura de servicios</span> a nombre del Centro (luz, internet)
+
+El nombre en el documento debe coincidir <span class="k">exactamente</span> con el Business Portfolio.</pre>
+        <div class="ep-section-label">⚠ Trabas posibles</div>
+        <pre><span class="c">// TRABA 1: Nombre del Centro no coincide con Business Manager
+//    "Centro de Integración Paso a Paso S.R.L." en AFIP vs "Centro Paso a Paso" en Meta.
+//    Solución: actualizar el nombre en Meta Business Manager para que coincida,
+//    o subir documento adicional que justifique la relación entre los nombres.</span>
+
+<span class="c">// TRABA 2: El Centro no tiene página web o presencia online verificable
+//    Meta intenta verificar la existencia del negocio online.
+//    Solución: crear al menos una landing simple o página de Facebook/Instagram
+//    con el nombre exacto antes de enviar la verificación.</span>
+
+<span class="c">// TRABA 3: Verificación demorada más de 14 días
+//    Ocurre a veces sin causa aparente. Solución: abrir ticket de soporte en
+//    business.facebook.com/direct-support/ pidiendo revisión manual.</span>
+
+<span class="c">// TRABA 4: ONGs/organizaciones sin fines de lucro
+//    Las organizaciones sociales sin personería jurídica comercial pueden tener
+//    dificultades. Mejor usar documentos de AFIP (inscripción) que documentos
+//    societarios si no los tienen.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method get" style="min-width:28px;text-align:center">8</span>
+        <span class="ep-path">Checklist final + errores comunes en producción</span>
+        <span class="ep-desc">Antes de hacer el go-live con usuarios reales</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Checklist antes de go-live</div>
+        <pre><span class="s">✓</span> App en modo <span class="k">Live</span> (no Development — en Development solo llegan msgs de testers)
+<span class="s">✓</span> Número de producción en estado <span class="k">CONNECTED</span> en WhatsApp Manager
+<span class="s">✓</span> System user token guardado como variable de entorno en el servidor de SAIE
+<span class="s">✓</span> Webhook verificado, suscrito al campo <span class="k">messages</span>, respondiendo 200 en &lt;1s
+<span class="s">✓</span> Al menos 1 template UTILITY aprobado
+<span class="s">✓</span> Display name aprobado (o en revisión — no bloquea el envío)
+<span class="s">✓</span> Dominio con TLS activo en producción (ngrok solo para dev)</pre>
+        <div class="ep-section-label">Errores frecuentes en producción (2026)</div>
+        <pre><span class="c">// Error 190: Token inválido o expirado → renovar token del system user
+// Error 100: Template no encontrado o no aprobado → verificar nombre exacto del template
+// Error 130429: Rate limit superado → throttle de envíos, max 80 msg/seg
+// Webhook silencioso: Meta deja de enviar → revisar que el endpoint responde 200
+// BSUID null/phone_number null: migración de Meta a BSUIDs en 2026
+//   → usar el campo `user_id` del webhook además de `from`</span></pre>
+      </div>
+    </div>
+
+  </div><!-- end steps -->
+
+  <div class="info-box" style="margin-top:20px">
+    <strong>Resumen real de tiempos:</strong> Podés tener el desarrollo funcionando con el número de test en el <strong>día 1</strong>. El número de producción propio tarda <strong>1–3 días</strong> (display name). La verificación empresarial suma otros <strong>2–7 días</strong> pero no bloquea — podés lanzar con el límite de 250 msgs/día mientras se procesa. El proceso completo hasta producción sin trabas es <strong>3–5 días hábiles</strong> de espera, con ~1 hora de trabajo tuyo.
+  </div>
+
+</div><!-- end meta panel -->
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: KAPSO SETUP
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-kapso">
+  <div class="section-header">
+    <div class="eyebrow">Configuración · Probado el 21/07/2026</div>
+    <h2>Setup de Kapso — experiencia real</h2>
+    <p>Esta guía documenta el proceso real de setup hecho el 21 de julio de 2026. Los comandos, errores y soluciones son exactamente los que ocurrieron.</p>
+  </div>
+
+  <!-- RESULTADO FINAL -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+    <div class="node node-sys" style="max-width:none">
+      <div class="node-title">✅ Tiempo total</div>
+      <div class="node-sub" style="margin-top:6px">~30 minutos desde cero hasta primer mensaje recibido en WhatsApp. Incluyendo errores y resolución.</div>
+    </div>
+    <div class="node node-sys" style="max-width:none">
+      <div class="node-title">✅ Número activo</div>
+      <div class="node-sub" style="margin-top:6px"><strong style="color:var(--text-1)">+1 555-353-5901</strong> · Display name "Centro Paso a Paso" aprobado sin espera. Status: CONNECTED.</div>
+    </div>
+    <div class="node node-sys" style="max-width:none">
+      <div class="node-title">✅ Sin fricción de Meta</div>
+      <div class="node-sub" style="margin-top:6px">Kapso manejó el Embedded Signup. No hubo passkey, no hubo verificación empresarial, no hubo espera de display name.</div>
+    </div>
+  </div>
+
+  <div class="info-box blue">
+    <strong>Contexto:</strong> se intentó primero con Meta directo y con la cuenta de Lucas Katcheroff. La cuenta tenía una restricción activa y una verificación empresarial pendiente desde hacía 5 días hábiles sin resolverse. Se switcheó a la cuenta de Gustavo Katcheroff y se usó Kapso — funcionó en 30 minutos.
+  </div>
+
+  <!-- PASOS REALES -->
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim);min-width:28px;text-align:center">✓</span>
+        <span class="ep-path">Paso 1 — Instalar el CLI de Kapso</span>
+        <span class="ep-desc">⏱ 2 min · 1 error encontrado y resuelto</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Comando que falló</div>
+        <pre>npm install -g @kapso/cli
+<span class="c">// npm error code EACCES — permission denied en /usr/local/lib/node_modules/@kapso
+// Causa: npm global sin permisos de escritura en macOS</span></pre>
+        <div class="ep-section-label">Solución</div>
+        <pre>sudo npm install -g @kapso/cli
+<span class="c">// Pide la contraseña del Mac. Al escribirla no aparecen asteriscos — es normal.
+// Resultado: "added 150 packages in 2s" → instalación exitosa.</span></pre>
+        <div class="ep-section-label">⚠ A tener en cuenta</div>
+        <pre><span class="c">// Este error de permisos ocurre en macOS cuando Node.js fue instalado
+// directamente (no vía nvm o brew). Es el error más común en el primer intento.
+// La solución siempre es agregar sudo al comando de instalación global.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim);min-width:28px;text-align:center">✓</span>
+        <span class="ep-path">Paso 2 — Login con Kapso</span>
+        <span class="ep-desc">⏱ 2 min · Sin errores</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Comando</div>
+        <pre>kapso login</pre>
+        <div class="ep-section-label">Output real</div>
+        <pre>✔ Ready to begin login
+✔ Authentication URL generated
+
+Opening your browser to complete login...
+If your browser doesn't open automatically, visit:
+https://app.kapso.ai/cli/auth/cc998449d922d52d412716e078e03d06
+
+✔ Logged in successfully as katchelucas@gmail.com
+Using project Default project (4947945a-c223-409d-885a-ef7c2048e0b5)
+Next:
+  kapso whatsapp numbers new
+  kapso status</pre>
+        <div class="ep-section-label">Nota</div>
+        <pre><span class="c">// Se logueó con la cuenta de Gmail de Guz.
+// El proyecto se llama "Default project" — se puede renombrar desde app.kapso.ai.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim);min-width:28px;text-align:center">✓</span>
+        <span class="ep-path">Paso 3 — Setup del número de WhatsApp</span>
+        <span class="ep-desc">⏱ 15 min · Embedded Signup de Meta vía Kapso</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Comando</div>
+        <pre>kapso setup</pre>
+        <div class="ep-section-label">Output real</div>
+        <pre>WhatsApp setup started.
+
+Open this URL to connect or provision a WhatsApp number:
+https://app.kapso.ai/whatsapp/setup/C42RUwnu3Wu1Ges9nGP1s_B_iQwvMsSBbcL9kkiIvWY
+
+Next:
+  kapso whatsapp numbers list
+  kapso status</pre>
+        <div class="ep-section-label">Qué pasó en la URL</div>
+        <pre><span class="c">// Kapso abre el Embedded Signup de Meta dentro de su propio flujo.
+// Se eligió el número de sandbox/producción +1 555-353-5901.
+// Display name "Centro Paso a Paso" → aprobado sin espera (AVAILABLE_WITHOUT_REVIEW).
+// No pidió verificación empresarial, no pidió passkey, no hubo restricciones.</span></pre>
+        <div class="ep-section-label">⚠ Traba que apareció</div>
+        <pre><span class="c">// Al intentar con la cuenta de Meta de Lucas: 
+// "No puedes continuar con esta operación porque tu cuenta de WhatsApp Business
+// está restringida."
+// Solución: usar la cuenta de Guz (sin historial de restricciones).
+// La restricción de la cuenta de Lucas sigue pendiente de resolución por Meta.</span></pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim);min-width:28px;text-align:center">✓</span>
+        <span class="ep-path">Paso 4 — Verificar números conectados</span>
+        <span class="ep-desc">⏱ 1 min · Sin errores</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Comando</div>
+        <pre>kapso whatsapp numbers list</pre>
+        <div class="ep-section-label">Números disponibles</div>
+        <pre><span class="c">// Número de producción:</span>
+{
+  <span class="k">"id"</span>: <span class="s">"1239124659280244"</span>,
+  <span class="k">"phone_number_id"</span>: <span class="s">"1239124659280244"</span>,
+  <span class="k">"display_name"</span>: <span class="s">"Centro Paso a Paso"</span>,
+  <span class="k">"display_phone_number"</span>: <span class="s">"+1 555-353-5901"</span>,
+  <span class="k">"status"</span>: <span class="s">"CONNECTED"</span>,
+  <span class="k">"kind"</span>: <span class="s">"production"</span>,
+  <span class="k">"verified_name"</span>: <span class="s">"Centro Paso a Paso"</span>,
+  <span class="k">"name_status"</span>: <span class="s">"AVAILABLE_WITHOUT_REVIEW"</span>,
+  <span class="k">"business_account_id"</span>: <span class="s">"1513904919845737"</span>
+}
+
+<span class="c">// Número sandbox:</span>
+{
+  <span class="k">"id"</span>: <span class="s">"597907523413541"</span>,
+  <span class="k">"display_name"</span>: <span class="s">"Sandbox WhatsApp"</span>,
+  <span class="k">"kind"</span>: <span class="s">"sandbox"</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="ep-header" onclick="toggleEp(this)">
+        <span class="ep-method post" style="background:rgba(37,211,102,.1);color:var(--green);border-color:var(--green-dim);min-width:28px;text-align:center">✓</span>
+        <span class="ep-path">Paso 5 — Enviar primer mensaje</span>
+        <span class="ep-desc">⏱ 2 min · 1 error encontrado y resuelto</span>
+        <span class="ep-chevron">›</span>
+      </div>
+      <div class="ep-body">
+        <div class="ep-section-label">Comando que falló</div>
+        <pre>kapso whatsapp messages send --phone-number 1239124659280244 --to 5491153496753 --text "Hola desde SAIE"
+<span class="c">// Error: WhatsApp number "1239124659280244" not found.
+// Run "kapso whatsapp numbers list" and retry with "--phone-number-id" or "--phone-number".</span></pre>
+        <div class="ep-section-label">Solución — flag correcto</div>
+        <pre>kapso whatsapp messages send --phone-number-id 1239124659280244 --to 5491153496753 --text "Hola desde SAIE"
+<span class="c">// El flag es --phone-number-id, no --phone-number.
+// Resultado: mensaje recibido en WhatsApp ✅</span></pre>
+        <div class="ep-section-label">Variables de entorno a guardar en SAIE</div>
+        <pre><span class="k">KAPSO_PHONE_NUMBER_ID</span>=<span class="s">"1239124659280244"</span>
+<span class="k">KAPSO_BUSINESS_ACCOUNT_ID</span>=<span class="s">"1513904919845737"</span>
+<span class="k">KAPSO_API_KEY</span>=<span class="s">"kp_xxxx"</span>  <span class="c">// desde app.kapso.ai → Settings → API Keys</span></pre>
+      </div>
+    </div>
+
+  </div><!-- end steps -->
+
+  <!-- ESTADO ACTUAL -->
+  <div class="section-header" style="margin-top:32px">
+    <div class="eyebrow">Estado al 21/07/2026</div>
+    <h2>Qué está listo y qué falta</h2>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="color:var(--green)">✅</span> &nbsp;Listo</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--text-2)">
+        <div>📱 Número <strong style="color:var(--text-1)">+1 555-353-5901</strong> conectado y CONNECTED</div>
+        <div>🏷️ Display name <strong style="color:var(--text-1)">"Centro Paso a Paso"</strong> aprobado</div>
+        <div>📤 Mensajes salientes funcionando vía CLI</div>
+        <div>🔑 CLI instalado en la Mac de Lucas</div>
+        <div>📊 WABA ID: <code style="color:var(--green)">1513904919845737</code></div>
+        <div>📞 Phone Number ID: <code style="color:var(--green)">1239124659280244</code></div>
+      </div>
+    </div>
+    <div class="stack-layer">
+      <div class="stack-layer-header">
+        <div class="stack-layer-title"><span style="color:var(--amber)">⏳</span> &nbsp;Pendiente</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--text-2)">
+        <div>🔗 Webhook configurado en el backend de SAIE</div>
+        <div>🔑 API key de Kapso en el <code>.env</code> del proyecto</div>
+        <div>📋 Templates UTILITY creados y aprobados en Meta</div>
+        <div>📨 Mensajes entrantes procesados por el router de actores</div>
+        <div>🔢 Número argentino (+54) propio para producción real</div>
+        <div>✅ Verificación empresarial del Centro en Meta (opcional para MVP)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRÓXIMO PASO: WEBHOOK -->
+  <div class="info-box">
+    <strong>Próximo paso concreto — configurar el webhook:</strong> el backend de SAIE necesita un endpoint <code style="color:var(--green)">POST /webhook/kapso</code> que reciba los mensajes entrantes. Kapso entrega los eventos ordenados y con reintentos automáticos. Una vez configurado, el flujo de onboarding de familias y empleados puede arrancar.
+  </div>
+
+  <!-- COMPARATIVA META VS KAPSO (EXPERIENCIA REAL) -->
+  <div class="section-header" style="margin-top:32px">
+    <div class="eyebrow">Lección aprendida</div>
+    <h2>Meta directo vs Kapso — lo que pasó en la práctica</h2>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Dimensión</th>
+          <th style="text-align:center;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Meta directo (intento)</th>
+          <th style="text-align:center;padding:10px 12px;color:var(--text-2);font-weight:500;font-family:var(--mono)">Kapso (resultado)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--text-2)">Tiempo hasta primer mensaje</td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--coral)">Nunca llegó</span><div style="font-size:10px;color:var(--text-3)">bloqueado por restricción de cuenta</div></td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--green)">~30 min</span><div style="font-size:10px;color:var(--text-3)">incluyendo errores y resolución</div></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--text-2)">Restricción de cuenta Meta</td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--coral)">Bloqueante</span><div style="font-size:10px;color:var(--text-3)">5+ días sin resolverse</div></td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--green)">Evitada</span><div style="font-size:10px;color:var(--text-3)">cuenta de Guz sin restricciones</div></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--text-2)">Passkey requerida</td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--coral)">Sí, bloqueante</span></td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--green)">No pedida</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--text-2)">Display name</td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--coral)">No llegó a pedirlo</span></td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--green)">Aprobado sin revisión</span><div style="font-size:10px;color:var(--text-3)">AVAILABLE_WITHOUT_REVIEW</div></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:10px 12px;color:var(--text-2)">Verificación empresarial</td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--coral)">Pendiente 5 días</span></td>
+          <td style="text-align:center;padding:10px 12px"><span style="color:var(--green)">No requerida</span><div style="font-size:10px;color:var(--text-3)">para el MVP</div></td>
+        </tr>
+        <tr>
+          <td style="padding:10px 12px;color:var(--text-2)">Errores encontrados</td>
+          <td style="text-align:center;padding:10px 12px;color:var(--text-2)">Restricción de cuenta, passkey, verificación pendiente</td>
+          <td style="text-align:center;padding:10px 12px;color:var(--text-2)">EACCES en npm (sudo), flag --phone-number vs --phone-number-id</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end kapso panel -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PANEL: COMPARACIÓN PROVEEDORES
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="p-comparacion">
+
+<div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap">
+  <button class="sub-tab active" onclick="showSub('wa')">📱 WhatsApp Providers</button>
+  <button class="sub-tab" onclick="showSub('stt')">🎙️ Speech-to-Text</button>
+</div>
+
+<!-- ════════════ SUB-PANEL: WHATSAPP PROVIDERS ════════════ -->
+<div class="sub-panel active" id="sp-wa">
+
+<div class="section-header">
+  <div class="eyebrow">WhatsApp API · Comparación exhaustiva</div>
+  <h2>9 proveedores evaluados en 7 dimensiones</h2>
+  <p>Evaluación abierta del mercado 2026. Todos los proveedores relevantes, desde Meta directo hasta plataformas no-code. Dimensiones: pricing, DX/setup, control técnico, soporte y docs, privacidad, madurez, vendor lock-in.</p>
+</div>
+
+<!-- LEYENDA DE SCORES -->
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);font-size:11px;color:var(--text-2)">
+  <span>Scores: <strong style="color:var(--text-1)">5</strong> = excelente &nbsp;·&nbsp; <strong style="color:var(--text-1)">4</strong> = bueno &nbsp;·&nbsp; <strong style="color:var(--text-1)">3</strong> = aceptable &nbsp;·&nbsp; <strong style="color:var(--text-1)">2</strong> = débil &nbsp;·&nbsp; <strong style="color:var(--text-1)">1</strong> = malo/no aplica</span>
+  <span>🟢 recomendado &nbsp;·&nbsp; 🟡 alternativa válida &nbsp;·&nbsp; 🔴 descartado para SAIE</span>
+</div>
+
+<!-- TABLA MAESTRA WA -->
+<div style="overflow-x:auto;margin-bottom:32px">
+<table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1100px">
+<thead>
+<tr style="border-bottom:2px solid var(--border)">
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);position:sticky;left:0;background:var(--bg);min-width:140px">Proveedor</th>
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">Tipo</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">💰 Pricing</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🛠 DX/Setup</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">⚙️ Control</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">📚 Soporte/Docs</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🔒 Privacidad</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🏛 Madurez</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🔓 Lock-in</th>
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">Veredicto SAIE</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- Meta Cloud API -->
+<tr style="border-bottom:1px solid var(--border);background:rgba(37,211,102,0.03)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:#4ADE80;font-size:12px">Meta Cloud API</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">directo</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Acceso directo. Sin BSP.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">$0/mes plat.</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">setup manual</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">total</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">docs ok, soporte malo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">WABA tuyo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">Meta = infra</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">portabilidad total</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(37,211,102,.12);color:var(--green);border:1px solid var(--green-dim);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟢 Elegida</span></td>
+</tr>
+
+<!-- Kapso -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--teal);font-size:12px">Kapso</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">BSP dev-first</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">BSP WhatsApp-only. SDK TS, MCP, workflows, sandbox.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">free/25$/mes, 0 markup</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">sandbox inmediato</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">SDK TS limpio</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">startup joven, docs ok</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">datos en US, no EU</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">2</span><div style="font-size:9px;color:var(--text-3)">lanzado 2025, nuevo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">número portátil a Meta</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(45,212,191,.1);color:var(--teal);border:1px solid rgba(45,212,191,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟢 Plan B</span></td>
+</tr>
+
+<!-- Twilio -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--blue);font-size:12px">Twilio</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">BSP CPaaS</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">CPaaS. WA + SMS + voz. Sandbox incluido.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">$0 + $0.005/msg x2</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">sandbox rápido</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">SDKs maduros</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">mejor docs del mercado</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">datos en US, SOC2</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">empresa listada NYSE</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">número portátil</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(74,158,255,.1);color:var(--blue);border:1px solid rgba(74,158,255,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟡 Alt. dev</span></td>
+</tr>
+
+<!-- 360dialog -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--purple);font-size:12px">360dialog</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">BSP WhatsApp-only</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">API pura. Sin dashboard. Low markup.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">€49/mes fijo + 0 markup</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">Embedded Signup</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">API idéntica a Meta</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">docs ok, soporte medio</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">EU headquartered</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">BSP de 2017, establecido</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">número portátil</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 costo fijo alto</span></td>
+</tr>
+
+<!-- Wati -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--amber);font-size:12px">Wati</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">plataforma no-code</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Inbox compartido + chatbot + broadcasts. WhatsApp-only.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">$49/mes + 20% markup</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">sin código, UI lista</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">caja negra, sin API</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">soporte lento reportado</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">datos en US, SOC2</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">varios años en mercado</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">número portátil, datos no</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 no-code, no aplica</span></td>
+</tr>
+
+<!-- Respond.io -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--amber);font-size:12px">Respond.io</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">plataforma omnicanal</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">CRM conversacional. WA + Instagram + TikTok + más.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">por seat, 0 markup msg</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">UI lista, rápido</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">plataforma cerrada</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">buena doc y soporte</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US servers, SOC2</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">empresa consolidada</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">historial queda en plat.</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 fuera de stack</span></td>
+</tr>
+
+<!-- Bird / MessageBird -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Bird (MessageBird)</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">CPaaS omnicanal</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">WA + SMS + email. Rebrand 2024. Inbox + API.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">$45/mes + $0.005/msg</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">rebrand causó fricción</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">API existe, no primaria</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">docs en transición</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US/EU según plan</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">rebrand = inestabilidad</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">portátil con fricción</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 rebrand riesgo</span></td>
+</tr>
+
+<!-- Infobip -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Infobip</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">enterprise CPaaS</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Omnicanal enterprise. 190+ países. SLA enterprise.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">1</span><div style="font-size:9px;color:var(--text-3)">opaco, requiere ventas</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">complejo, enterprise</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">muy flexible a escala</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">soporte 24/7, SLA</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">190+ países, local nodes</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">fundada 2006, sólida</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">contratos enterprise</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 overkill SMB</span></td>
+</tr>
+
+<!-- Vonage -->
+<tr>
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Vonage (Ericsson)</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">CPaaS voz+WA</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Voice API + WA. Fuerte en voz. Enterprise.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">pago por uso, ~$0.005</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">docs menos claras</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">buena API, menos WA-native</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">soporte ok, no excelente</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US servers</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">adquirida por Ericsson</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">portátil, moderado</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 sin voz no aporta</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<!-- ANÁLISIS POR DIMENSIÓN -->
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px">
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">💰</span>
+      <span class="ep-path">Pricing — análisis detallado</span>
+      <span class="ep-desc">Modelos de facturación, markups, costos reales a volumen SAIE</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section-label">Estructura del costo total (2 capas)</div>
+      <pre><span class="k">Capa 1 — Meta</span>: cobra por template entregado (desde jul 2025)
+  Utility (AR):   ~$0.034/msg — gratis dentro de ventana 24hs
+  Marketing (AR): ~$0.063/msg — siempre se cobra
+  Service:        $0.00 — siempre gratis
+  
+<span class="k">Capa 2 — BSP markup</span> (encima de Meta):
+  Meta directo:   <span class="s">$0.00 markup</span>
+  Kapso:          <span class="s">$0.00 markup</span> (cobra suscripción fija)
+  360dialog:      <span class="s">$0.00 markup</span> (€49/mes fijo)
+  Twilio:         <span class="s">+$0.005/msg</span> enviado Y recibido
+  Bird:           <span class="s">+$0.005/msg</span> enviado + por template
+  Wati:           <span class="s">+20%</span> sobre tarifa Meta
+  Respond.io:     <span class="s">$0.00 markup</span> msg (cobra por seat)</pre>
+      <div class="ep-section-label">Costo estimado mensual para SAIE</div>
+      <pre>Supuesto: 200 msgs/mes salientes, 80% dentro de ventana 24hs
+  Meta directo:     ~$1.36/mes (solo msgs fuera de ventana)
+  Kapso Free:       $0.00/mes (2k msgs incluidos)
+  Kapso Pro:        $25.00/mes (incluye 100k msgs)
+  Twilio:           ~$3.36/mes ($1.36 Meta + $2 markup Twilio)
+  360dialog:        €49/mes = ~$54/mes (independiente del volumen)
+  Wati:             $49/mes plataforma + markup sobre Meta</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🛠</span>
+      <span class="ep-path">Facilidad de setup / DX — análisis detallado</span>
+      <span class="ep-desc">Tiempo hasta primer mensaje, complejidad de onboarding, sandbox</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Meta directo</span>
+  Tiempo:      2–5 días (verificación Business, display name)
+  Sandbox:     número de test gratuito generado automático
+  Fricción:    manual, muchos pasos en diferentes paneles de Meta
+
+<span class="k">Kapso</span>
+  Tiempo:      &lt;1 hora para sandbox, horas para producción
+  Sandbox:     número compartido Kapso listo al registrarse
+  Fricción:    mínima — SDK TypeScript, CLI, MCP listos
+
+<span class="k">Twilio</span>
+  Tiempo:      &lt;30 min para sandbox
+  Sandbox:     número de Twilio compartido (+1 415 523 8886)
+  Fricción:    baja — la mejor documentación del mercado
+
+<span class="k">Wati / Respond.io</span>
+  Tiempo:      horas para la plataforma, días para número propio
+  Sandbox:     no tienen sandbox de código
+  Fricción:    baja para usuarios no-técnicos, alta para devs</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🔒</span>
+      <span class="ep-path">Privacidad / dónde viven los datos</span>
+      <span class="ep-desc">Servidores, GDPR, retención de datos, data residency</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Meta Cloud API directo</span>
+  Servidor:     infraestructura de Meta (US/global)
+  Datos:        mensajes en tránsito en servidores Meta
+  Compliance:   E2E encryption en tránsito, Meta DPA disponible
+  Nota:         los mensajes SIEMPRE pasan por Meta — es inherente a WA
+
+<span class="k">Kapso</span>
+  Servidor:     US (Cloudflare Workers)
+  Datos:        historial almacenado en infra Kapso
+  Compliance:   SOC 2 en proceso (startup 2025)
+  
+<span class="k">360dialog</span>
+  Servidor:     EU (headquarters Berlin)
+  Compliance:   GDPR, DPA firmable, ventaja para datos europeos
+
+<span class="k">Twilio / Bird</span>
+  Servidor:     US principalmente, EU data residency opcional (planes enterprise)
+  Compliance:   SOC 2, ISO 27001, HIPAA (Enterprise)
+
+<span class="k">Infobip</span>
+  Servidor:     190+ países, nodos locales, mejor data residency del mercado
+  Compliance:   GDPR, HIPAA, ISO 27001 — el más robusto</pre>
+      <div class="ep-section-label">Nota para SAIE</div>
+      <pre><span class="c">// Los audios de empleados (informes) SÍ tienen implicaciones de privacidad.
+// Para SAIE, lo más sensible son los documentos de familias (DNI, etc.).
+// A este volumen, ningún proveedor requiere compliance especial.
+// Si en el futuro hay requisito de datos en Argentina → self-hosted WA on-premise
+// (no disponible, Meta deprecó On-Premises en 2025) o infra en LATAM.</span></pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🔓</span>
+      <span class="ep-path">Vendor lock-in y portabilidad</span>
+      <span class="ep-desc">Qué pasa si querés cambiar de proveedor. Qué se pierde, qué se preserva.</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Lo que SIEMPRE es tuyo (portable entre cualquier BSP o Meta directo):</span>
+  ✓ El número de teléfono
+  ✓ El WABA (WhatsApp Business Account ID)
+  ✓ Los templates aprobados (con calidad APPROVED)
+  ✓ El display name y quality rating del número
+  ✓ El blue tick / Official Business Account status
+  
+<span class="k">Lo que NO migra:</span>
+  ✗ Historial de conversaciones (queda en el BSP de origen)
+  ✗ Templates con calidad LOW o REJECTED
+  ✗ Automatizaciones / workflows del BSP (son propietarios)
+  ✗ Contactos enriquecidos en la plataforma
+
+<span class="k">Proceso de migración BSP → BSP:</span>
+  1. Deshabilitar 2FA en el número actual
+  2. Embedded Signup en el nuevo BSP
+  3. Verificar código SMS/voz
+  4. Migración completa en minutos, sin downtime
+
+<span class="k">Ventaja de Meta directo o Kapso:</span>
+  Tu WABA está bajo tu propio Business Manager.
+  Migrar es mínimo — solo cambiás endpoints en el código.
+  
+<span class="k">Riesgo real con plataformas cerradas (Wati, Respond.io):</span>
+  El historial de conversaciones queda atrapado.
+  Los flows/chatbots no son exportables.
+  Dependencia funcional alta aunque el número sea portable.</pre>
+    </div>
+  </div>
+
+</div>
+
+<!-- TABLA RESUMEN BSP MARKUPS -->
+<div class="info-box" style="margin-bottom:20px">
+  <strong>Regla clave para elegir:</strong> BSP <em>Tech Provider</em> (Meta directo, Kapso, 360dialog) = WABA bajo tu Business Manager, tarifa Meta directa, portabilidad total. BSP <em>Solution Partner</em> tradicional (Twilio, Wati, Bird) = ellos actúan de intermediarios, pueden agregar markup, pueden dificultar la salida. Para SAIE, el camino <strong>Meta directo o Kapso</strong> es el correcto: datos en tu WABA, cero markup, máxima portabilidad.
+</div>
+
+<!-- FUENTES WA -->
+<div class="sources-block">
+  <div class="sources-title">Fuentes consultadas — WhatsApp Providers</div>
+  <div class="source-list">
+    <div class="src-item"><span class="src-num">[1]</span><div><div class="src-title">Meta for Developers — WhatsApp Cloud API Get Started + Business Phone Numbers</div><div><a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/get-started" target="_blank">developers.facebook.com/…/whatsapp/get-started</a> · <a href="https://developers.facebook.com/documentation/business-messaging/whatsapp/business-phone-numbers/phone-numbers" target="_blank">…/phone-numbers</a></div><div class="src-date">Oct 2025 / Feb 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[2]</span><div><div class="src-title">Kapso — Pricing page + Twilio alternative + Docs pricing FAQ</div><div><a href="https://kapso.com/pricing" target="_blank">kapso.com/pricing</a> · <a href="https://kapso.com/twilio-alternative-for-whatsapp" target="_blank">kapso.com/twilio-alternative-for-whatsapp</a> · <a href="https://docs.kapso.ai/docs/whatsapp/pricing-faq" target="_blank">docs.kapso.ai/…/pricing-faq</a></div><div class="src-date">Consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[3]</span><div><div class="src-title">Respond.io — WhatsApp Business API Pricing 2026 (markups por BSP: Wati +20%, Twilio +$0.005, Bird +$0.005)</div><div><a href="https://respond.io/blog/whatsapp-business-api-pricing" target="_blank">respond.io/blog/whatsapp-business-api-pricing</a></div><div class="src-date">Ene 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[4]</span><div><div class="src-title">SetSmart — WhatsApp Business API Pricing 2026: Hidden Fees (modelo por mensaje, tasas por país)</div><div><a href="https://setsmart.io/blog/whatsapp-business-api-pricing" target="_blank">setsmart.io/blog/whatsapp-business-api-pricing</a></div><div class="src-date">Abr 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[5]</span><div><div class="src-title">EZContact — 360Dialog Pricing 2026 vs Twilio, WATI (comparativa de costo total de ownership)</div><div><a href="https://ezcontact.ai/en/blog/whatsapp-api-pricing-comparison-meta-twilio-360dialog-ezcontact/" target="_blank">ezcontact.ai/en/blog/whatsapp-api-pricing-comparison…</a></div><div class="src-date">1 mes antes jun 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[6]</span><div><div class="src-title">Telnyx — How to Choose the Best WhatsApp API Provider (Tech Provider vs BSP, lock-in)</div><div><a href="https://telnyx.com/resources/best-whatsapp-api-provider" target="_blank">telnyx.com/resources/best-whatsapp-api-provider</a></div><div class="src-date">3 semanas antes jun 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[7]</span><div><div class="src-title">Whautomate — WhatsApp Tech Provider vs BSP: Which Should You Choose in 2026?</div><div><a href="https://whautomate.com/whatsapp-tech-provider-vs-bsp" target="_blank">whautomate.com/whatsapp-tech-provider-vs-bsp</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[8]</span><div><div class="src-title">Interakt — Complete Guide to WhatsApp Business Provider Migration (portabilidad, qué se preserva, qué no)</div><div><a href="https://www.interakt.shop/blog/the-guide-to-migrate-whatsapp-business-api-number-from-one-provider-to-another/" target="_blank">interakt.shop/blog/the-guide-to-migrate-whatsapp…</a></div><div class="src-date">Oct 2025 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[9]</span><div><div class="src-title">Hyperleap — WhatsApp Business API Providers Comparison 2026 (perfiles: Wati, 360dialog, Twilio, Infobip, Bird)</div><div><a href="https://hyperleap.ai/whatsapp-business-api/providers" target="_blank">hyperleap.ai/whatsapp-business-api/providers</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[10]</span><div><div class="src-title">Prelude.so — Top 10 WhatsApp BSPs 2026 (perfiles completos, recomendaciones por use case)</div><div><a href="https://prelude.so/blog/best-whatsapp-business-solution-providers" target="_blank">prelude.so/blog/best-whatsapp-business-solution-providers</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[11]</span><div><div class="src-title">Traffictail — 10 Best WhatsApp API Platforms 2026 (lock-in risk, template migration, vendor stability)</div><div><a href="https://traffictail.com/whatsapp-business-api-platforms/" target="_blank">traffictail.com/whatsapp-business-api-platforms/</a></div><div class="src-date">2 semanas antes jun 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[12]</span><div><div class="src-title">npmjs — @kapso/whatsapp-cloud-api (SDK, ejemplos de código, parámetros)</div><div><a href="https://www.npmjs.com/package/@kapso/whatsapp-cloud-api" target="_blank">npmjs.com/package/@kapso/whatsapp-cloud-api</a></div><div class="src-date">Mar 2026 · consultado jun 2026</div></div></div>
+  </div>
+</div>
+
+</div><!-- end sp-wa -->
+
+<!-- ════════════ SUB-PANEL: STT ════════════ -->
+<div class="sub-panel" id="sp-stt">
+
+<div class="section-header">
+  <div class="eyebrow">Speech-to-Text · Comparación exhaustiva</div>
+  <h2>8 proveedores evaluados en 7 dimensiones</h2>
+  <p>Evaluación abierta del mercado 2026. Contexto SAIE: audios cortos ogg/m4a de WhatsApp, español rioplatense, jerga clínica, volumen bajo. Procesamiento batch (no tiempo real).</p>
+</div>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);font-size:11px;color:var(--text-2)">
+  <span>WER = Word Error Rate. Menor es mejor. Benchmarks en audio limpio EN; ES puede diferir ±3pp.</span>
+  <span>Batch = procesamiento post-audio. Realtime = streaming en vivo (no necesario para SAIE).</span>
+</div>
+
+<!-- TABLA MAESTRA STT -->
+<div style="overflow-x:auto;margin-bottom:32px">
+<table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1100px">
+<thead>
+<tr style="border-bottom:2px solid var(--border)">
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono);position:sticky;left:0;background:var(--bg);min-width:150px">Proveedor</th>
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">Modelo</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">💰 Precio</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🎯 Precisión</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🛠 DX/Setup</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">📚 Soporte/Docs</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🔒 Privacidad</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🏛 Madurez</th>
+  <th style="text-align:center;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">🔓 Lock-in</th>
+  <th style="text-align:left;padding:10px 12px;color:var(--text-3);font-weight:500;font-family:var(--mono)">Veredicto SAIE</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- OpenAI Whisper -->
+<tr style="border-bottom:1px solid var(--border);background:rgba(37,211,102,0.03)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:#4ADE80;font-size:12px">OpenAI Whisper</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">whisper-1 / gpt-4o-transcribe</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Batch. 98 idiomas. Sin RT nativo. 25MB límite.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">$0.006/min, sin mínimo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">4–8% WER EN; ES sólido</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">ya integrado en SAIE</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">mejor comunidad dev</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">datos en US, SOC2</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">OpenAI, establecido</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">estándar abierto</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(37,211,102,.12);color:var(--green);border:1px solid var(--green-dim);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟢 Elegida</span></td>
+</tr>
+
+<!-- ElevenLabs Scribe -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--blue);font-size:12px">ElevenLabs Scribe v2</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">batch + realtime</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Batch + RT. 90+ idiomas. Keyterm prompting. Diarización.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">$0.22/hr = $0.0037/min; 4.5hs free</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">1.7–3.9% WER; mejor del mercado</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">SDK TS, doc clara</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs buenas, soporte ok</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">SOC2, HIPAA, GDPR</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">STT desde 2025, nuevo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">sin SDK propietario crítico</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(74,158,255,.1);color:var(--blue);border:1px solid rgba(74,158,255,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟢 Upgrade fase 2</span></td>
+</tr>
+
+<!-- Deepgram -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--purple);font-size:12px">Deepgram Nova-3</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">batch + streaming</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Batch + Streaming. Más rápido del mercado. Voice Agent API.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">$0.0043/min; $200 créditos gratis</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">5.26% WER (audio real world)</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">SDKs, buenas docs</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs detalladas</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US servers; on-premise enterprise</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">empresa establecida</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">cambio de endpoint fácil</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--amber-bg);color:var(--amber);border:1px solid rgba(240,160,48,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟡 Si se necesita RT</span></td>
+</tr>
+
+<!-- AssemblyAI -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--purple);font-size:12px">AssemblyAI</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">Universal-2 / Slam-1</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Batch + streaming. Análisis semántico integrado. LeMUR.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">$0.006/min (~$0.37/hr); $50 gratis</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">30% menos halluc. vs Whisper</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs excelentes</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">mejor soporte del segmento</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US infra, GDPR concerns</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">fundada 2017, Series C</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">cambio de endpoint estándar</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--amber-bg);color:var(--amber);border:1px solid rgba(240,160,48,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟡 Si se necesita análisis</span></td>
+</tr>
+
+<!-- Gladia -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--teal);font-size:12px">Gladia Solaria</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">Solaria-3 · async + RT</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Async + RT. 100+ idiomas. EU data residency. Pure-play STT.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">$0.61/hr Starter; $0.20/hr Growth; 10hs free</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">94% accuracy ES/EN/FR; Solaria-3 #1 biz audio</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">10hs gratis, REST claro</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs claras, benchmarks públicos</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">EU residency por defecto; GDPR, SOC2, ISO27001</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">fundada 2021, creciendo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">pure-play, no compite contigo</div></td>
+  <td style="padding:11px 12px"><span style="background:rgba(45,212,191,.1);color:var(--teal);border:1px solid rgba(45,212,191,.3);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟡 Si privacidad importa</span></td>
+</tr>
+
+<!-- Whisper open-source -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Whisper open-source</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">faster-whisper, self-hosted</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">Self-hosted. Requiere GPU. Datos nunca salen.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">$0 API; costo GPU infra</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">idéntico al gestionado</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">semanas de setup prod</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">comunidad enorme, OSS</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">datos nunca salen de tu infra</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">OpenAI, modelo estándar</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">cero dependencia externa</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🟡 Fase 3 (&gt;5k min/mes)</span></td>
+</tr>
+
+<!-- Google Cloud Speech -->
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Google Cloud Speech</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">Chirp 3</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">100+ idiomas. Integrado en GCP. Batch + RT.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">$0.96/hr = 11x Deepgram</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">13–23% WER según audio</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">bien si ya usás GCP</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs Google</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">US/global, GDPR available</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">Google, máxima madurez</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">lock-in GCP real</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 caro, no en stack</span></td>
+</tr>
+
+<!-- Azure -->
+<tr>
+  <td style="padding:11px 12px;position:sticky;left:0;background:rgba(14,17,23,0.98)">
+    <div style="font-weight:600;color:var(--slate);font-size:12px">Azure AI Speech</div>
+    <div style="font-size:10px;color:var(--text-3);font-family:var(--mono)">MAI-Transcribe-1</div>
+  </td>
+  <td style="padding:11px 12px;color:var(--text-2)">140+ idiomas. Azure ecosystem. Enterprise compliance.</td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">$1/hr RT; $0.36/hr batch</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">3.8% WER (MAI-1) — nuevo</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--amber)">3</span><div style="font-size:9px;color:var(--text-3)">bien si ya usás Azure</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">4</span><div style="font-size:9px;color:var(--text-3)">docs Microsoft</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">Azure regions, GDPR, HIPAA</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:#4ADE80">5</span><div style="font-size:9px;color:var(--text-3)">Microsoft, máxima madurez</div></td>
+  <td style="text-align:center;padding:11px 12px"><span style="font-weight:700;color:var(--coral)">2</span><div style="font-size:9px;color:var(--text-3)">lock-in Azure real</div></td>
+  <td style="padding:11px 12px"><span style="background:var(--slate-bg);color:var(--slate);border:1px solid rgba(122,139,168,.25);padding:2px 7px;border-radius:20px;font-size:10px;font-family:var(--mono)">🔴 no en stack SAIE</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<!-- ANÁLISIS POR DIMENSIÓN STT -->
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px">
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🎯</span>
+      <span class="ep-path">Precisión — lo que WER no te dice</span>
+      <span class="ep-desc">Por qué los benchmarks no sirven y cómo testear en tu audio real</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Problema con los benchmarks públicos (LibriSpeech, FLEURS):</span>
+  Audio limpio, hablantes nativos, sin ruido, sin acento local.
+  Un WER de 5% en benchmark puede convertirse en 15–20% en tu audio real.
+  
+<span class="k">Factores específicos de SAIE que afectan el WER real:</span>
+  • Acento rioplatense (LL/Y, voseo, entonación)
+  • Terminología clínica-educativa: "prestación", "legajo", "integración"
+  • Audios de WhatsApp (ogg/m4a): compresión lossy, posible ruido ambiente
+  • Grabaciones cortas (30s–3min): menos contexto para el modelo
+
+<span class="k">Solución práctica:</span>
+  1. Grabar 20 audios de prueba con empleados reales de SAIE
+  2. Transcribirlos en paralelo con Whisper + ElevenLabs Scribe + Gladia
+  3. Comparar WER manual (contar errores en términos clave)
+  4. Elegir el que mejor maneje los términos del dominio
+
+<span class="k">Feature clave para SAIE: Keyterm Prompting</span>
+  ElevenLabs y AssemblyAI permiten dar un glosario de términos
+  → el modelo prioriza esas palabras aunque suenen similar a otras.
+  Ejemplo: ["RETAS", "RET", "prestación", "legajo", "Paso a Paso"]
+  Esto puede ser decisivo en el dominio de SAIE.</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🔒</span>
+      <span class="ep-path">Privacidad STT — diferencias importantes</span>
+      <span class="ep-desc">Dónde viven los audios, retención, GDPR, data training opt-out</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Gladia</span>  — EU data residency por defecto (París)
+         GDPR, SOC 2 Type II, ISO 27001
+         Growth+: opt-out automático de usar tus audios para training
+         Enterprise: zero retention, custom hosting
+
+<span class="k">ElevenLabs</span>  — EU data residency disponible (Enterprise)
+             SOC 2, HIPAA, GDPR compliance
+             Zero Retention mode disponible en planes Enterprise
+
+<span class="k">OpenAI Whisper</span>  — US servers
+                 SOC 2 Type II, GDPR DPA firmable
+                 Retención: OpenAI puede retener inputs hasta 30 días
+                 (revisá los términos de uso actual)
+
+<span class="k">AssemblyAI</span>  — US infrastructure
+            GDPR concerns: datos ruteados por US incluso con DPA
+            SOC 2 Type II disponible
+
+<span class="k">Whisper open-source</span>  — cero. Datos nunca salen de tu máquina.
+                     Mejor opción si hay preocupaciones de privacidad de datos
+                     clínicos/educativos.
+
+<span class="c">// Para SAIE hoy: audios de empleados sobre alumnos = sensibles.
+// No hay requisito legal estricto todavía en Argentina (sin ley de datos médicos específica).
+// Recomendación: empezar con OpenAI (más simple) y documentar los audios
+// que contienen información sensible para evaluar si escala a Whisper self-hosted.</span></pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">🔓</span>
+      <span class="ep-path">Lock-in STT — es mínimo entre los players principales</span>
+      <span class="ep-desc">Por qué cambiar de proveedor STT es fácil comparado con cambiar de WA provider</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">El lock-in en STT es bajo</span>  porque:
+  • Todos tienen el mismo shape de request: audio input → text output
+  • El cambio es 3–5 líneas de código (endpoint + auth + params)
+  • No hay "historial atrapado" — el texto transcripto queda en tu BDD
+  • Los audios originales quedan en tu Storage (Supabase)
+
+<span class="k">Excepción: features propietarios</span>
+  Si dependés de AssemblyAI LeMUR (análisis semántico) → más acoplamiento
+  Si dependés de Kapso Workflows (WA) → más acoplamiento
+  Regla: usar features estándar de transcripción, no features AI avanzados,
+  permite migrar en horas.
+
+<span class="k">Estrategia recomendada para SAIE:</span>
+  Abstraer el provider en una función:
+  
+  async transcribeAudio(buffer, mimeType) {
+    return whisperTranscribe(buffer);  // swap fácil
+  }
+  
+  Si el día de mañana querés cambiar a Scribe o Gladia:
+  modificás 1 función, no el resto del sistema.</pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method get" style="min-width:28px;text-align:center">📊</span>
+      <span class="ep-path">Pricing STT — comparativa de costo real para SAIE</span>
+      <span class="ep-desc">Escenarios de volumen bajo, medio y alto con precios de jun 2026</span>
+      <span class="ep-chevron">›</span>
+    </div>
+    <div class="ep-body">
+      <pre><span class="k">Precios batch (jun 2026):</span>
+  OpenAI whisper-1 / gpt-4o-transcribe:  $0.006/min    = $0.36/hr
+  OpenAI gpt-4o-mini-transcribe:         $0.003/min    = $0.18/hr  ← más barato
+  ElevenLabs Scribe v2:                  $0.0037/min   = $0.22/hr
+  AssemblyAI Universal-2:                $0.006/min    = $0.37/hr
+  Deepgram Nova-3 (batch):               $0.0043/min   = $0.26/hr
+  Gladia Solaria (Starter):              $0.0102/min   = $0.61/hr
+  Gladia Solaria (Growth, commit):       $0.0033/min   = $0.20/hr
+  Google Cloud Chirp (batch):            $0.016/min    = $0.96/hr
+  Whisper open-source:                   $0.00 API     + infra GPU
+
+<span class="k">Costo mensual estimado SAIE (promedio 1.5 min/audio):</span>
+                        20 audios/día    50 audios/día
+  OpenAI (whisper-1):     $5.40/mes       $13.50/mes
+  OpenAI (mini-transcr):  $2.70/mes       $6.75/mes  ← recomendado para SAIE
+  ElevenLabs Scribe v2:   $3.33/mes       $8.33/mes  (o gratis si &lt;270 min/mes)
+  Deepgram Nova-3:        $3.87/mes       $9.68/mes
+  Gladia (Starter):       $9.18/mes       $22.95/mes
+  Gladia (Growth):        $2.97/mes       $7.43/mes  (requiere commit anual)
+
+<span class="c">// A este volumen, todos los providers son baratos. La diferencia entre
+// el más caro y el más barato es ~$15/mes. No es la variable decisiva.
+// Decidir por precisión en ES-AR y facilidad de integración, no por precio.</span></pre>
+    </div>
+  </div>
+
+</div>
+
+<!-- DECISIÓN POR FASES -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
+  <div class="node node-sys" style="max-width:none">
+    <div class="node-title">Fase 1 — Lanzamiento</div>
+    <div class="node-sub" style="margin-top:8px">
+      <strong style="color:var(--text-1)">STT:</strong> gpt-4o-mini-transcribe (OpenAI)<br>
+      Mismo proveedor que Vision AI. Mínima configuración. $0–7/mes.
+    </div>
+  </div>
+  <div class="node node-ai" style="max-width:none">
+    <div class="node-title">Fase 2 — Si ES-AR da problemas</div>
+    <div class="node-sub" style="margin-top:8px">
+      <strong style="color:var(--text-1)">STT:</strong> ElevenLabs Scribe v2 con keyterm prompting.<br>
+      Glosario SAIE. Plan free cubre volumen inicial.
+    </div>
+  </div>
+  <div class="node node-db" style="max-width:none">
+    <div class="node-title">Fase 2B — Si privacidad importa</div>
+    <div class="node-sub" style="margin-top:8px">
+      <strong style="color:var(--text-1)">STT:</strong> Gladia Solaria (EU data residency).<br>
+      10 hs gratis/mes. 100+ idiomas. Compliance GDPR nativo.
+    </div>
+  </div>
+</div>
+
+<!-- FUENTES STT -->
+<div class="sources-block">
+  <div class="sources-title">Fuentes consultadas — Speech-to-Text</div>
+  <div class="source-list">
+    <div class="src-item"><span class="src-num">[1]</span><div><div class="src-title">OpenAI — Pricing y docs de Audio Transcription (whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe)</div><div><a href="https://platform.openai.com/docs/api-reference/audio/createTranscription" target="_blank">platform.openai.com/docs/api-reference/audio/createTranscription</a></div><div class="src-date">Consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[2]</span><div><div class="src-title">ElevenLabs — STT API docs + Pricing API (Scribe v2: $0.22/hr; RT: $0.39/hr; keyterm prompting)</div><div><a href="https://elevenlabs.io/docs/overview/capabilities/speech-to-text" target="_blank">elevenlabs.io/docs/…/speech-to-text</a> · <a href="https://elevenlabs.io/pricing/api" target="_blank">elevenlabs.io/pricing/api</a></div><div class="src-date">Consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[3]</span><div><div class="src-title">Gladia — Pricing page (Starter $0.61/hr; Growth $0.20/hr; 10hs free) + Solaria-3 model page</div><div><a href="https://www.gladia.io/pricing" target="_blank">gladia.io/pricing</a> · <a href="https://www.gladia.io" target="_blank">gladia.io</a></div><div class="src-date">Consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[4]</span><div><div class="src-title">Future AGI — Speech-to-Text APIs in 2026: Benchmarks, Pricing, Developer's Decision Guide (8 proveedores, WER, latencia)</div><div><a href="https://futureagi.com/blog/speech-to-text-apis-in-2026-benchmarks-pricing-developer-s-decision-guide/" target="_blank">futureagi.com/blog/speech-to-text-apis-in-2026…</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[5]</span><div><div class="src-title">Deepgram — Best Speech-to-Text APIs in 2026 (WER por proveedor, pricing comparativo)</div><div><a href="https://deepgram.com/learn/best-speech-to-text-apis-2026" target="_blank">deepgram.com/learn/best-speech-to-text-apis-2026</a></div><div class="src-date">Feb 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[6]</span><div><div class="src-title">Coval — Best STT Providers 2026: Independent Benchmarks (14 proveedores, latencia EOT, datos de privacidad)</div><div><a href="https://www.coval.ai/blog/best-speech-to-text-providers-in-2026-independent-benchmarks-and-how-to-choose/" target="_blank">coval.ai/blog/best-speech-to-text-providers-in-2026…</a></div><div class="src-date">3 semanas antes jun 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[7]</span><div><div class="src-title">Gladia — AssemblyAI vs Deepgram: Best STT API (comparativa independiente, datos de privacidad US vs EU)</div><div><a href="https://www.gladia.io/blog/assemblyai-vs-deepgram" target="_blank">gladia.io/blog/assemblyai-vs-deepgram</a></div><div class="src-date">Mar 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[8]</span><div><div class="src-title">Gladia — Deepgram vs Gladia (precios add-ons Deepgram, lock-in, EU residency)</div><div><a href="https://www.gladia.io/blog/deepgram-vs-gladia" target="_blank">gladia.io/blog/deepgram-vs-gladia</a></div><div class="src-date">Mar 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[9]</span><div><div class="src-title">AssemblyAI — Benchmarks page (WER comparativo, entidad accuracy, latencia streaming, jun 2026)</div><div><a href="https://www.assemblyai.com/benchmarks" target="_blank">assemblyai.com/benchmarks</a></div><div class="src-date">Actualizado 8 jun 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[10]</span><div><div class="src-title">Speechmatics — Best speech-to-text AI guide 2026 (14 proveedores, perfiles, casos de uso)</div><div><a href="https://www.speechmatics.com/company/articles-and-news/best-speech-to-text-ai-guide-apis-platforms-and-services-compared" target="_blank">speechmatics.com/…/best-speech-to-text-ai-guide…</a></div><div class="src-date">Abr 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[11]</span><div><div class="src-title">Whipscribe — Gladia tool profile (pricing exacto Starter $0.61/hr, Growth $0.20/hr, verificado may 2026)</div><div><a href="https://whipscribe.com/tools/gladia" target="_blank">whipscribe.com/tools/gladia</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+    <div class="src-item"><span class="src-num">[12]</span><div><div class="src-title">CAMB.AI — STT Benchmark: Whisper vs ElevenLabs (WER 1.7–3.9% Scribe v2, precios por hora)</div><div><a href="https://www.camb.ai/blog-post/speech-to-text-api-benchmark-whisper-vs-elevenlabs-vs-camb-ai-accuracy-latency" target="_blank">camb.ai/blog-post/speech-to-text-api-benchmark-whisper-vs-elevenlabs…</a></div><div class="src-date">May 2026 · consultado jun 2026</div></div></div>
+  </div>
+</div>
+
+</div><!-- end sp-stt -->
+
+</div><!-- end comparacion panel -->
+
+</main>
+
+<script>
+const PANELS = ['overview','onboarding','familias','empleados','sistema','stack','endpoints','meta','kapso','comparacion'];
+
+function showSub(id) {
+  document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sp-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  const idx = PANELS.indexOf(id);
+  if (idx >= 0) document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleEp(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.ep-chevron');
+  const isOpen = body.classList.toggle('open');
+  chevron.style.transform = isOpen ? 'rotate(90deg)' : '';
+}
+</script>
+</body>
+</html>
