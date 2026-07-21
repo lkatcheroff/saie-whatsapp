@@ -1,4 +1,3 @@
-// ─── SAIE WHATSAPP · index.js ────────────────────────────────
 require('dotenv').config();
 const express = require('express');
 const app = express();
@@ -6,11 +5,11 @@ const app = express();
 app.use(express.json());
 
 const { getUsuarioWA }       = require('./bdd');
+const { getSesion }          = require('./sesiones');
 const { procesarOnboarding } = require('./onboarding');
 
-// ─── WEBHOOK ENTRANTE DE KAPSO ───────────────────────────────
 app.post('/webhook', async (req, res) => {
-  res.sendStatus(200); // responder inmediatamente siempre
+  res.sendStatus(200);
 
   const body = req.body;
   const msg  = body?.message;
@@ -22,63 +21,58 @@ app.post('/webhook', async (req, res) => {
 
   console.log(`\n📩 ${name} (${from}) | tipo: ${type}`);
 
-  // ── Identificar si el número está registrado ──
-  const usuario = await getUsuarioWA(from);
-
-  if (!usuario) {
-    // Número desconocido → onboarding
-    console.log(`   → número no registrado, iniciando onboarding`);
+  // ── 1. ¿Hay una sesión de onboarding activa? ──
+  const sesion = await getSesion(from);
+  if (sesion) {
+    console.log(`   → onboarding en curso, paso: ${sesion.paso}`);
     await procesarOnboarding(from, name, msg);
     return;
   }
 
-  // Número registrado → router de actores
+  // ── 2. ¿El número está registrado en usuarios_wa? ──
+  const usuario = await getUsuarioWA(from);
+  if (!usuario) {
+    console.log(`   → número nuevo, iniciando onboarding`);
+    await procesarOnboarding(from, name, msg);
+    return;
+  }
+
+  // ── 3. Usuario registrado → router de actores ──
   console.log(`   → usuario registrado: rol=${usuario.rol}`);
 
-  if (type === 'text') {
-    await handleTextMessage(from, name, msg, usuario);
-  } else if (type === 'image') {
-    await handleImage(from, name, msg, usuario);
-  } else if (type === 'audio') {
-    await handleAudio(from, name, msg, usuario);
-  }
+  if (type === 'text')  await handleTextMessage(from, name, msg, usuario);
+  if (type === 'image') await handleImage(from, name, msg, usuario);
+  if (type === 'audio') await handleAudio(from, name, msg, usuario);
 });
 
-// ─── HANDLERS PARA USUARIOS REGISTRADOS ─────────────────────
 async function handleTextMessage(from, name, msg, usuario) {
   const texto = msg.text?.body;
   console.log(`   Texto: "${texto}"`);
-
   if (usuario.rol === 'familia') {
-    // TODO: lógica familia - responder preguntas sobre docs, etc.
     console.log(`   → familia | prestacion_id: ${usuario.prestacion_id}`);
-  } else if (usuario.rol === 'empleado') {
-    // TODO: lógica empleado - registrar informe de texto
+    // TODO: lógica familia
+  } else {
     console.log(`   → empleado | empleado_id: ${usuario.empleado_id}`);
+    // TODO: lógica empleado
   }
 }
 
 async function handleImage(from, name, msg, usuario) {
   console.log(`   Imagen de ${name}`);
-  // TODO: descargar desde Kapso/Meta
-  // TODO: clasificar tipo de documento
-  // TODO: validar con GPT-4o Vision
+  // TODO: descargar, clasificar, validar con Vision AI
 }
 
 async function handleAudio(from, name, msg, usuario) {
   console.log(`   Audio de ${name}`);
-  // TODO: descargar audio
   // TODO: transcribir con Whisper
-  // TODO: guardar en informes_empleados
 }
 
-// ─── HEALTH CHECK ────────────────────────────────────────────
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', sistema: 'SAIE WhatsApp', version: '2.0' });
+  res.json({ status: 'ok', sistema: 'SAIE WhatsApp', version: '3.0' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ SAIE WhatsApp v2 corriendo en puerto ${PORT}`);
-  console.log(`   Mock data: Norberto Alonso (alumno) | Angel Labruna (empleado)`);
+  console.log(`✅ SAIE WhatsApp v3 corriendo en puerto ${PORT}`);
+  console.log(`   Mock: Norberto Alonso (alumno) | Angel Labruna (empleado)`);
 });
