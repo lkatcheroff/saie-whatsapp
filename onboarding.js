@@ -1,7 +1,4 @@
 // ─── FLUJO DE ONBOARDING ─────────────────────────────────────
-// Se ejecuta cuando llega un mensaje de un número no registrado.
-// Guarda el estado en sesiones.js (en memoria por ahora).
-
 const { enviarTexto, enviarTemplate } = require('./whatsapp');
 const { buscarPrestacionPorNombre, buscarEmpleadoPorNombre, crearUsuarioWA } = require('./bdd');
 const { getSesion, guardarSesion, eliminarSesion } = require('./sesiones');
@@ -22,8 +19,8 @@ async function procesarOnboarding(from, name, msg) {
 // ─── PASO 1: Saludar y preguntar rol ─────────────────────────
 async function pasoInicio(from) {
   await guardarSesion(from, { paso: 'esperando_rol' });
-  // Intenta con template, si falla usa texto libre (ventana 24hs)
-  await enviarTemplate(from, 'bienvenida_registro');
+  // Texto libre mientras el display name no esté aprobado
+  await enviarTexto(from, '¡Hola! Soy el asistente de Centro Paso a Paso. Para registrarte, ¿sos *familiar de un alumno* o *profesional del equipo*?');
 }
 
 // ─── PASO 2: Procesar rol ────────────────────────────────────
@@ -92,7 +89,6 @@ async function pasoConfirmacion(from, msg, sesion) {
     return;
   }
 
-  // Registrar en usuarios_wa
   const { entidad, rol } = sesion;
   await crearUsuarioWA({
     phone_number:  from,

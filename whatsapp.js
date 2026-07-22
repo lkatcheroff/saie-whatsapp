@@ -22,17 +22,16 @@ async function enviarTexto(to, texto) {
   }
 }
 
-// Enviar template aprobado (puede iniciar conversación)
+// Enviar template aprobado (puede iniciar conversación sin ventana 24hs)
 async function enviarTemplate(to, templateName, variables = []) {
   try {
     const components = variables.length > 0
       ? [{ type: 'body', parameters: variables.map(v => ({ type: 'text', text: v })) }]
       : [];
 
-    await client.messages.send({
+    await client.messages.templateSender.send({
       phoneNumberId: PHONE_ID,
       to,
-      type: 'template',
       template: {
         name: templateName,
         language: { code: 'es' },
@@ -41,9 +40,7 @@ async function enviarTemplate(to, templateName, variables = []) {
     });
     console.log(`[WA] ✓ template "${templateName}" enviado a ${to}`);
   } catch (err) {
-    console.error(`[WA] ✗ error enviando template a ${to}:`, err.message);
-    // Fallback: si el template falla, intentar texto libre
-    await enviarTexto(to, `Hola, soy el asistente de Centro Paso a Paso. ¿Sos familiar de un alumno o profesional del equipo?`);
+    console.error(`[WA] ✗ error enviando template "${templateName}":`, err.message);
   }
 }
 
